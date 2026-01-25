@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="Common/Common.csproj" Id="608d80ba-e718-41b6-9386-5d461809d4f5" />
+  <Project Path="DataContext/DataContext.csproj" Id="466ae168-f82e-4b8e-82e1-1951338f66a6" />
   <Project Path="MyProject/MyProject.csproj" />
+  <Project Path="Repository/Repository.csproj" Id="189a0117-7827-4f9b-9360-43713e0a187b" />
+  <Project Path="Services/Services.csproj" Id="2efd8390-1213-4c0a-986d-f39efa04583e" />
 </Solution>
