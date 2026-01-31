@@ -8,7 +8,10 @@
 
   <ItemGroup>
     <Folder Include="Entities\" />
-    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Repositories\UserAnswerRepository.cs" />
   </ItemGroup>
 
   <ItemGroup>
