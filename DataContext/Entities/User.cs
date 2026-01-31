@@ -13,6 +13,7 @@ namespace DataContext.Entities
         public string Name { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get; set; }
+        public string AvatarUrl { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
