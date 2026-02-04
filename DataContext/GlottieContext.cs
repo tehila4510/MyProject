@@ -22,6 +22,13 @@ namespace DataContext
             modelBuilder.Entity<UserSkillProgress>()
                 .HasKey(usp => new { usp.UserId, usp.SkillId });
 
+            // הקשר בין Session ל-UserAnswer
+            modelBuilder.Entity<UserAnswer>()
+                .HasOne(ua => ua.Session)
+                .WithMany(s => s.UserAnswers)
+                .HasForeignKey(ua => ua.SessionId)
+                .OnDelete(DeleteBehavior.Restrict); // או NoAction
+
             base.OnModelCreating(modelBuilder);
         }
 

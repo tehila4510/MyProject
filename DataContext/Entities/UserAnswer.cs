@@ -17,6 +17,8 @@ namespace DataContext.Entities
         public User User { get; set; }
         public int QuestionId { get; set; } // FK
         public Question Question { get; set; }
+        public int SessionId { get; set; }
+        public Session Session { get; set; }
 
         public string UserAnswerText { get; set; }
         public bool IsCorrect { get; set; }
