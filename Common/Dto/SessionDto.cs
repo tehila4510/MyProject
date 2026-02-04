@@ -6,5 +6,10 @@ namespace Common.Dto
 {
     public class SessionDto
     {
+        public int SessionId { get; set; } // PK
+        public int UserId { get; set; } // FK
+        public int Score { get; set; }
+        public int QuestionsCount { get; set; }
+        public double DurationInMinutes { get; set; }
     }
 }
