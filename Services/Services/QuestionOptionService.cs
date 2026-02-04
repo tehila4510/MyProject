@@ -6,9 +6,9 @@ using Common.Dto;
 
 namespace Services.Services
 {
-    public class QuestionOptionService : IService<QusetionOptionDto>
+    public class QuestionOptionService : IService<QuestionOptionDto>
     {
-        public Task<QusetionOptionDto> Add(QusetionOptionDto item)
+        public Task<QuestionOptionDto> Add(QuestionOptionDto item)
         {
             throw new NotImplementedException();
         }
@@ -18,17 +18,17 @@ namespace Services.Services
             throw new NotImplementedException();
         }
 
-        public Task<List<QusetionOptionDto>> GetAll()
+        public Task<List<QuestionOptionDto>> GetAll()
         {
             throw new NotImplementedException();
         }
 
-        public Task<QusetionOptionDto> GetById(int id)
+        public Task<QuestionOptionDto> GetById(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<QusetionOptionDto> Update(int id, QusetionOptionDto item)
+        public Task<QuestionOptionDto> Update(int id, QuestionOptionDto item)
         {
             throw new NotImplementedException();
         }
