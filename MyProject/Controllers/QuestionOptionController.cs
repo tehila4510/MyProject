@@ -13,36 +13,36 @@ namespace MyProject.Controllers
     public class QuestionOptionController : ControllerBase
     {
         private IConfiguration _configuration;
-        private readonly IService<QusetionOptionDto> service;
-        public QuestionOptionController(IConfiguration _configuration, IService<QusetionOptionDto> service)
+        private readonly IService<QuestionOptionDto> service;
+        public QuestionOptionController(IConfiguration _configuration, IService<QuestionOptionDto> service)
         {
             this._configuration = _configuration;
             this.service = service;
         }
         // GET: api/<QuestionOptionController>
         [HttpGet]
-        public async Task<List<QusetionOptionDto>> Get()
+        public async Task<List<QuestionOptionDto>> Get()
         {
             return await service.GetAll();
         }
 
         // GET api/<QuestionOptionController>/5
         [HttpGet("{id}")]
-        public async Task<QusetionOptionDto> Get(int id)
+        public async Task<QuestionOptionDto> Get(int id)
         {
            return await service.GetById(id);
         }
 
         // POST api/<QuestionOptionController>
         [HttpPost]
-        public async Task<QusetionOptionDto> Post([FromForm] QusetionOptionDto value)
+        public async Task<QuestionOptionDto> Post([FromForm] QuestionOptionDto value)
         {
             return await service.Add(value);
         }
 
         // PUT api/<QuestionOptionController>/5
         [HttpPut("{id}")]
-        public async Task<QusetionOptionDto> Put(int id, [FromBody] QusetionOptionDto value)
+        public async Task<QuestionOptionDto> Put(int id, [FromBody] QuestionOptionDto value)
         {
             return await service.Update(id,value);
         }
