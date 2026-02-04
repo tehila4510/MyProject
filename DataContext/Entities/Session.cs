@@ -14,5 +14,8 @@ namespace DataContext.Entities
         public DateTime? EndedAt { get; set; }
         public int Score { get; set; }
         public int QuestionsCount { get; set; }
+
+        public ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
+
     }
 }
