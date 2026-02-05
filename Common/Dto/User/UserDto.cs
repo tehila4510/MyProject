@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Common.Dto
+namespace Common.Dto.User
 {
     public class UserDto
     {
@@ -18,7 +18,7 @@ namespace Common.Dto
         public int Streak { get; set; } = 0;        
         public int Hearts { get; set; } = 5;        
         public DateTime? LastActivity { get; set; }
-        public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("o"); // ISO 8601
+        public DateTime CreatedAt { get; set; }
 
         public bool IsPro { get; set; }             
         public DateTime? ProUntil { get; set; }     

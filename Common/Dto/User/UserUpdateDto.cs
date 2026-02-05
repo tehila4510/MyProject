@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Common.Dto
+namespace Common.Dto.User
 {
     public class UserUpdateDto
     {

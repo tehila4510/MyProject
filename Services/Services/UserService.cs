@@ -1,4 +1,4 @@
-﻿using Common.Dto;
+﻿using Common.Dto.User;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace Services.Services
             throw new NotImplementedException();
         }
 
-        public UserDto Exist(Login l)
+        public UserDto Exist(LoginDto l)
         {
             throw new NotImplementedException();
         }

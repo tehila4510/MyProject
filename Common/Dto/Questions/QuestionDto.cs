@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Common.Dto
+namespace Common.Dto.Question
 {
     public class QuestionDto
     {

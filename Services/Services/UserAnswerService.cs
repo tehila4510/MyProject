@@ -1,4 +1,4 @@
-﻿using Common.Dto;
+﻿using Common.Dto.UserProgress;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
