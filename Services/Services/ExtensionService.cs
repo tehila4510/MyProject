@@ -1,4 +1,4 @@
-﻿using Common.Dto;
+﻿using Common.Dto.User;
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Repositories;
 using Services.Interfaces;

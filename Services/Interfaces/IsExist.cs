@@ -1,4 +1,4 @@
-﻿using Common.Dto;
+﻿using Common.Dto.User;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,6 +7,6 @@ namespace Services.Interfaces
 {
     public interface IsExist<T>
     {
-       public T Exist(Login l);
+       public T Exist(LoginDto l);
     }
 }

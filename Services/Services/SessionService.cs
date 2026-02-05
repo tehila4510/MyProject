@@ -1,4 +1,4 @@
-﻿using Common.Dto;
+﻿using Common.Dto.Sessions;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using Common.Dto;
+﻿using Common.Dto.UserProgress;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using System.Threading.Tasks;
