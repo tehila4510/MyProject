@@ -1,4 +1,4 @@
-﻿using DataContext.Entities;
+﻿using Repository.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Interfaces;
 using System;

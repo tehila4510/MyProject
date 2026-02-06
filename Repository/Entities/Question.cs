@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DataContext.Entities
+namespace Repository.Entities
 {
     public class Question
     {
