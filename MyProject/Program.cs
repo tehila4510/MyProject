@@ -1,4 +1,11 @@
 
+using Common.Dto.Question;
+using Common.Dto.Sessions;
+using Common.Dto.User;
+using Common.Dto.UserProgress;
+using Services.Interfaces;
+using Services.Services;
+
 namespace MyProject
 {
     public class Program
@@ -11,6 +18,12 @@ namespace MyProject
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddScoped<IService<QuestionOptionDto>, QuestionOptionService>();
+            builder.Services.AddScoped<IService<QuestionDto>, QuestionService>();
+            builder.Services.AddScoped<IService<SessionDto>, SessionService>();
+            builder.Services.AddScoped<IService<UserAnswerDto>, UserAnswerService>();
+            builder.Services.AddScoped<IService<UserDto>, UserService>();
+            builder.Services.AddScoped<IService<UserSkillProgressDto>, UserSkillProgressService>();
 
             var app = builder.Build();
 

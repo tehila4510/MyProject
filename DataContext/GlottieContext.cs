@@ -1,6 +1,5 @@
 ﻿using System;
 using DataContext.Entities;
-using Common.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataContext
