@@ -1,36 +1,51 @@
-﻿using Common.Dto.UserProgress;
+﻿using AutoMapper;
+using Common.Dto.UserProgress;
+using Repository.Entities;
+using Repository.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Services.Services
 {
     public class UserSkillProgressService : IService<UserSkillProgressDto>
     {
-        public Task<UserSkillProgressDto> Add(UserSkillProgressDto item)
+        private readonly IRepository<UserSkillProgress> repository;
+        private readonly IMapper mapper;
+        public UserSkillProgressService(IRepository<UserSkillProgress> repository, IMapper mapper)
         {
-            throw new NotImplementedException();
+            this.repository= repository;
+            this.mapper= mapper;
+        }
+        public async Task<UserSkillProgressDto> Add(UserSkillProgressDto item)
+        {
+           var userSkillProgress = await repository.AddItem(mapper.Map<UserSkillProgress>(item));
+            return mapper.Map<UserSkillProgressDto>(userSkillProgress);
         }
 
-        public Task Delete(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            await repository.DeleteItem(id);
         }
 
-        public Task<List<UserSkillProgressDto>> GetAll()
+        public async Task<List<UserSkillProgressDto>> GetAll()
         {
-            throw new NotImplementedException();
+            var userSkillProgresses = await repository.GetAll();
+            return mapper.Map<List<UserSkillProgressDto>>(userSkillProgresses);
         }
 
-        public Task<UserSkillProgressDto> GetById(int id)
+        public async Task<UserSkillProgressDto> GetById(int id)
         {
-            throw new NotImplementedException();
+           var userSkillProgress =await repository.GetById(id);
+            return mapper.Map<UserSkillProgressDto>(userSkillProgress);
         }
 
-        public Task<UserSkillProgressDto> Update(int id, UserSkillProgressDto item)
+        public async Task<UserSkillProgressDto> Update(int id, UserSkillProgressDto item)
         {
-            throw new NotImplementedException();
+            var usp=await repository.UpdateItem(id, mapper.Map<UserSkillProgress>(item));
+            return mapper.Map<UserSkillProgressDto>(usp);
         }
     }
 }

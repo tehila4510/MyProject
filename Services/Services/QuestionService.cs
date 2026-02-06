@@ -1,4 +1,7 @@
-﻿using Common.Dto.Question;
+﻿using AutoMapper;
+using Common.Dto.Question;
+using Repository.Entities;
+using Repository.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,29 +11,41 @@ namespace Services.Services
 {
     public class QuestionService : IService<QuestionDto>
     {
-        public Task<QuestionDto> Add(QuestionDto item)
+        private readonly IRepository<Question> repository;
+        private readonly IMapper mapper;
+        public QuestionService(IRepository<Question> repository, IMapper mapper)
         {
-            throw new NotImplementedException();
+            this.mapper= mapper;
+            this.repository= repository;
+        }
+        public async Task<QuestionDto> Add(QuestionDto item)
+        {
+            var question =await repository.AddItem(mapper.Map<Question>(item));
+            return mapper.Map<QuestionDto>(question);
+
         }
 
-        public Task Delete(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            await repository.DeleteItem(id);
         }
 
-        public Task<List<QuestionDto>> GetAll()
+        public async Task<List<QuestionDto>> GetAll()
         {
-            throw new NotImplementedException();
+            var questions =await repository.GetAll();
+            return mapper.Map<List<QuestionDto>>(questions);
         }
 
-        public Task<QuestionDto> GetById(int id)
+        public async Task<QuestionDto> GetById(int id)
         {
-            throw new NotImplementedException();
+            var question =await repository.GetById(id);
+            return mapper.Map<QuestionDto>(question);
         }
 
-        public Task<QuestionDto> Update(int id, QuestionDto item)
+        public async Task<QuestionDto> Update(int id, QuestionDto item)
         {
-            throw new NotImplementedException();
+            var question =await repository.UpdateItem(id, mapper.Map<Question>(item));
+            return mapper.Map<QuestionDto>(question);
         }
     }
 }

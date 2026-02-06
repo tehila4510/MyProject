@@ -1,4 +1,7 @@
-﻿using Common.Dto.UserProgress;
+﻿using AutoMapper;
+using Common.Dto.UserProgress;
+using Repository.Entities;
+using Repository.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,29 +11,41 @@ namespace Services.Services
 {
     public class UserAnswerService : IService<UserAnswerDto>
     {
-        public Task<UserAnswerDto> Add(UserAnswerDto item)
+        private readonly IRepository<UserAnswer> repository;
+        private readonly IMapper mapper;
+        public UserAnswerService(IRepository<UserAnswer> repository, IMapper mapper)
         {
-            throw new NotImplementedException();
+            this.repository = repository;
+            this.mapper = mapper;
+        }
+        public async Task<UserAnswerDto> Add(UserAnswerDto item)
+        {
+            var ua = await repository.AddItem(mapper.Map<UserAnswer>(item));
+            return mapper.Map<UserAnswerDto>(ua);
         }
 
-        public Task Delete(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            await repository.DeleteItem(id);
         }
 
-        public Task<List<UserAnswerDto>> GetAll()
+        public async Task<List<UserAnswerDto>> GetAll()
         {
-            throw new NotImplementedException();
+            var ua = await repository.GetAll();
+            return mapper.Map<List<UserAnswerDto>>(ua);
+
         }
 
-        public Task<UserAnswerDto> GetById(int id)
+        public async Task<UserAnswerDto> GetById(int id)
         {
-            throw new NotImplementedException();
+            var ua = await repository.GetById(id);
+            return mapper.Map<UserAnswerDto>(ua);
         }
 
-        public Task<UserAnswerDto> Update(int id, UserAnswerDto item)
+        public async Task<UserAnswerDto> Update(int id, UserAnswerDto item)
         {
-            throw new NotImplementedException();
+            var ua = await repository.UpdateItem(id, mapper.Map<UserAnswer>(item));
+            return mapper.Map<UserAnswerDto>(ua);
         }
     }
 }
