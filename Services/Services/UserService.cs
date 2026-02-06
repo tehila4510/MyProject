@@ -1,4 +1,8 @@
-﻿using Common.Dto.User;
+﻿using AutoMapper;
+using Common.Dto.User;
+using Repository.Entities;
+using Repository.Interfaces;
+
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,14 +12,22 @@ namespace Services.Services
 {
     public class UserService : IService<UserDto>, IsExist<UserDto>
     {
-        public Task<UserDto> Add(UserDto item)
+        private readonly IRepository<User> repository;
+        private readonly IMapper mapper;
+        public UserService(IRepository<User> repository, IMapper mapper)
         {
-            throw new NotImplementedException();
+                this.repository = repository;
+                this.mapper = mapper;
+        }
+        public async Task<UserDto> Add(UserDto item)
+        {
+            var user = await repository.AddItem(mapper.Map<User>(item));
+            return mapper.Map<UserDto>(user);
         }
 
-        public Task Delete(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            await repository.DeleteItem(id);
         }
 
         public UserDto Exist(LoginDto l)
@@ -23,19 +35,22 @@ namespace Services.Services
             throw new NotImplementedException();
         }
 
-        public Task<List<UserDto>> GetAll()
+        public async Task<List<UserDto>> GetAll()
         {
-            throw new NotImplementedException();
+            var users = await repository.GetAll();
+            return mapper.Map<List<UserDto>>(users);
         }
 
-        public Task<UserDto> GetById(int id)
+        public async Task<UserDto> GetById(int id)
         {
-            throw new NotImplementedException();
+            var user = await repository.GetById(id);
+            return mapper.Map<UserDto>(user);
         }
 
-        public Task<UserDto> Update(int id, UserDto item)
+        public async Task<UserDto> Update(int id, UserDto item)
         {
-            throw new NotImplementedException();
+            var user=await repository.UpdateItem(id, mapper.Map<User>(item));
+            return mapper.Map<UserDto>(user);
         }
     }
 }

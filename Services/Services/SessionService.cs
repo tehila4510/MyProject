@@ -1,4 +1,7 @@
-﻿using Common.Dto.Sessions;
+﻿using AutoMapper;
+using Common.Dto.Sessions;
+using Repository.Entities;
+using Repository.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,29 +11,42 @@ namespace Services.Services
 {
     public class SessionService : IService<SessionDto>
     {
-        public Task<SessionDto> Add(SessionDto item)
+        private readonly IRepository<Session> repository;
+        private readonly IMapper mapper;
+
+        public SessionService(IRepository<Session> repository, IMapper mapper)
         {
-            throw new NotImplementedException();
+            this.mapper = mapper;
+            this.repository = repository;
+
+        }
+        public async Task<SessionDto> Add(SessionDto item)
+        {
+           var s=await repository.AddItem(mapper.Map<Session>(item));
+            return mapper.Map<SessionDto>(s);
         }
 
-        public Task Delete(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            await repository.DeleteItem(id);
         }
 
-        public Task<List<SessionDto>> GetAll()
+        public async Task<List<SessionDto>> GetAll()
         {
-            throw new NotImplementedException();
+            var sessions = await repository.GetAll();
+            return mapper.Map<List<SessionDto>>(sessions);
         }
 
-        public Task<SessionDto> GetById(int id)
+        public async Task<SessionDto> GetById(int id)
         {
-            throw new NotImplementedException();
+            var session =await repository.GetById(id);
+            return mapper.Map<SessionDto>(session);
         }
 
-        public Task<SessionDto> Update(int id, SessionDto item)
+        public async Task<SessionDto> Update(int id, SessionDto item)
         {
-            throw new NotImplementedException();
+            var session =await repository.UpdateItem(id, mapper.Map<Session>(item));
+            return mapper.Map<SessionDto>(session);
         }
     }
 }

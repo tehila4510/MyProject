@@ -1,36 +1,50 @@
-﻿using Services.Interfaces;
+﻿using AutoMapper;
+using Common.Dto.Question;
+using Repository.Entities;
+using Repository.Interfaces;
+using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Common.Dto.Question;
 
 namespace Services.Services
 {
     public class QuestionOptionService : IService<QuestionOptionDto>
     {
-        public Task<QuestionOptionDto> Add(QuestionOptionDto item)
+        private readonly IRepository<QuestionOption> repository;
+        private readonly IMapper mapper;
+        public QuestionOptionService()
         {
-            throw new NotImplementedException();
+            this.repository = repository;
+            this.mapper = mapper;
+        }
+        public async Task<QuestionOptionDto> Add(QuestionOptionDto item)
+        {
+            var qo=await repository.AddItem(mapper.Map<QuestionOption>(item));
+            return mapper.Map<QuestionOptionDto>(qo);
         }
 
-        public Task Delete(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            await repository.DeleteItem(id);
         }
 
-        public Task<List<QuestionOptionDto>> GetAll()
+        public async Task<List<QuestionOptionDto>> GetAll()
         {
-            throw new NotImplementedException();
+            var qo= await repository.GetAll();
+            return mapper.Map<List<QuestionOptionDto>>(qo);
         }
 
-        public Task<QuestionOptionDto> GetById(int id)
+        public async Task<QuestionOptionDto> GetById(int id)
         {
-            throw new NotImplementedException();
+           var qo=await repository.GetById(id);
+            return mapper.Map<QuestionOptionDto>(qo);
         }
 
         public Task<QuestionOptionDto> Update(int id, QuestionOptionDto item)
         {
-            throw new NotImplementedException();
+            var qo = repository.UpdateItem(id, mapper.Map<QuestionOption>(item));
+            return mapper.Map<Task<QuestionOptionDto>>(qo);
         }
     }
 }
