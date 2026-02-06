@@ -1,5 +1,5 @@
 ﻿using Common.Dto.Question;
-using DataContext.Entities;
+using Repository.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using System.Threading.Tasks;

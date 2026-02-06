@@ -11,13 +11,10 @@ namespace Common.Dto.Question
         public int SkillId { get; set; }
         public int LevelId { get; set; }
         public string QuestionText { get; set; }
-
-        public QuestionTypeEnum[] QuestionTypes { get; set; }
-        public AudioTypeEnum AudioType { get; set; }
         public string AudioSource { get; set; }
         public string ImageURL { get; set; }
 
-        public ICollection<QuestionOptionDto> Options { get; set; } = new List<QuestionOptionDto>();
+        public ICollection<QuestionOptionDto>? Options { get; set; } = new List<QuestionOptionDto>();
 
     }
 }

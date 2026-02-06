@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Common.Dto.User
@@ -10,9 +12,9 @@ namespace Common.Dto.User
 
         public string Name { get; set; }
         public string Email { get; set; }
-        public string AvatarUrl { get; set; }
-
-
+        public  byte[]? AvatarUrl { get; set; }
+        // Password is stored as a hash for security reasons
+        public IFormFile? file { get; set; }
         public int CurrentLevel { get; set; }       
         public int Xp { get; set; } = 0;            
         public int Streak { get; set; } = 0;        

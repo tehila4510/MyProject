@@ -1,5 +1,5 @@
 ﻿using System;
-using DataContext.Entities;
+using Repository.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataContext

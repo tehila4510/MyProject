@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataContext.Entities
+namespace Repository.Entities
 {
     public class Session
     {

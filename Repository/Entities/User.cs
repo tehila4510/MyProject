@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using static System.Collections.Specialized.BitVector32;
 
-namespace DataContext.Entities
+namespace Repository.Entities
 {
     public class User
     {

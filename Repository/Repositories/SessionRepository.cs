@@ -1,4 +1,4 @@
-﻿using DataContext.Entities;
+﻿using Repository.Entities;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
 using System;
