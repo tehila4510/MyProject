@@ -16,7 +16,7 @@ namespace Repository.Repositories
         }
         public async Task<User> AddItem(User item)
         {
-            ctx.Users.AddAsync(item);
+            await ctx.Users.AddAsync(item);
             await ctx.Save();
             return item;
         }
