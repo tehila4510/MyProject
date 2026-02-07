@@ -1,4 +1,7 @@
-﻿using Common.Dto.User;
+﻿using Common.Dto.Question;
+using Common.Dto.Sessions;
+using Common.Dto.User;
+using Common.Dto.UserProgress;
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Repositories;
 using Services.Interfaces;
@@ -15,6 +18,12 @@ namespace Services.Services
             services.AddRepository();
             services.AddScoped<IService<UserDto>, UserService>();
             services.AddScoped<IsExist<UserDto>, UserService>();
+            services.AddScoped<IService<QuestionOptionDto>, QuestionOptionService>();
+            services.AddScoped<IService<QuestionDto>, QuestionService>();
+            services.AddScoped<IService<SessionDto>, SessionService>();
+            services.AddScoped<IService<UserAnswerDto>, UserAnswerService>();
+            services.AddScoped<IService<UserDto>, UserService>();
+            services.AddScoped<IService<UserSkillProgressDto>, UserSkillProgressService>();
             return services;
         }
     }

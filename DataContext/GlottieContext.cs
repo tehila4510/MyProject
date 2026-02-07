@@ -1,12 +1,17 @@
 ﻿using System;
 using Repository.Entities;
 using Microsoft.EntityFrameworkCore;
+using Repository.Interfaces;
 
-namespace DataContext
+namespace DataContext.model
+
 {
-    public class GlottieContext : DbContext
+    public class GlottieContext : DbContext,IContext
     {
-        public GlottieContext() { }
+        private readonly string? _connection;
+        public GlottieContext(string _connection) {
+            this._connection = _connection;
+        }
 
         public GlottieContext(DbContextOptions<GlottieContext> options) : base(options) { }
 
@@ -30,14 +35,15 @@ namespace DataContext
 
             base.OnModelCreating(modelBuilder);
         }
-
+        public Task Save()
+        {
+            return SaveChangesAsync();
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //base.OnConfiguring(optionsBuilder);
 
-            optionsBuilder.UseSqlServer(
-                "Server=DESKTOP-2TSTMUL;Database=GlottieDB;Trusted_Connection=True;TrustServerCertificate=True"
-            );
+            optionsBuilder.UseSqlServer(_connection);
         }
     }
 }
