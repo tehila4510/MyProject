@@ -8,7 +8,7 @@ using System.Text;
 namespace Repository.Repositories
 {
     // לא ביצעתי הורשה מהממשק הרפוזיטורי כי יש פה 2 מפתחות ראשיים
-    public class UserSkillProgressRepository 
+    public class UserSkillProgressRepository :IRepository<UserSkillProgress>
     {
         private readonly IContext ctx;
         public UserSkillProgressRepository(IContext ctx)
@@ -41,7 +41,7 @@ namespace Repository.Repositories
         {
             return await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserId == UserId && x.SkillId == skillID);
         }
-
+    
         public async Task<UserSkillProgress> UpdateItem(int UserId, int skillID, UserSkillProgress item)
         {
             var usp = await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserId == UserId && x.SkillId == skillID);
@@ -51,6 +51,18 @@ namespace Repository.Repositories
                 usp.LastPracticed = item.LastPracticed;
             }
             return usp;
+        }
+        public Task DeleteItem(int id)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<UserSkillProgress> GetById(int id)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<UserSkillProgress> UpdateItem(int id, UserSkillProgress item)
+        {
+            throw new NotImplementedException();
         }
     }
 }
