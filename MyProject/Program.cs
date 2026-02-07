@@ -1,10 +1,13 @@
 
-using Common.Dto.Question;
-using Common.Dto.Sessions;
-using Common.Dto.User;
-using Common.Dto.UserProgress;
+using DataContext;
+using Microsoft.Extensions.DependencyInjection;
+using Repository.Interfaces;
 using Services.Interfaces;
 using Services.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Builder;
+using DataContext.model;
+
 
 namespace MyProject
 {
@@ -12,18 +15,19 @@ namespace MyProject
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
+            var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddScoped<IService<QuestionOptionDto>, QuestionOptionService>();
-            builder.Services.AddScoped<IService<QuestionDto>, QuestionService>();
-            builder.Services.AddScoped<IService<SessionDto>, SessionService>();
-            builder.Services.AddScoped<IService<UserAnswerDto>, UserAnswerService>();
-            builder.Services.AddScoped<IService<UserDto>, UserService>();
-            builder.Services.AddScoped<IService<UserSkillProgressDto>, UserSkillProgressService>();
+
+            builder.Services.AddSingleton<IContext>(new GlottieContext(connection));
+            builder.Services.AddAutoMapper(typeof(MapperProfile));
+            builder.Services.AddServices();
+
 
             var app = builder.Build();
 

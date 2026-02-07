@@ -30,7 +30,7 @@ namespace Services.Services
             await repository.DeleteItem(id);
         }
 
-        public UserDto Exist(LoginDto l)
+        public Task<UserDto> Exist(LoginDto l)
         {
             throw new NotImplementedException();
         }
