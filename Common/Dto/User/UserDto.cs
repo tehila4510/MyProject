@@ -12,8 +12,8 @@ namespace Common.Dto.User
 
         public string Name { get; set; }
         public string Email { get; set; }
-        public  byte[]? AvatarUrl { get; set; }
-        // Password is stored as a hash for security reasons
+        public string PasswordHash { get; set; }
+        public byte[]? AvatarUrl { get; set; }
         public IFormFile? file { get; set; }
         public int CurrentLevel { get; set; }       
         public int Xp { get; set; } = 0;            

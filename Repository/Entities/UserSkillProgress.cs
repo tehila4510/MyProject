@@ -6,6 +6,7 @@ namespace Repository.Entities
 {
     public class UserSkillProgress
     {
+        //public int userSkillProgressId { get; set; }
         public int UserId { get; set; } // FK + PK
         public User User { get; set; }
         

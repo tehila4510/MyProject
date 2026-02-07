@@ -1,6 +1,7 @@
 ﻿using Common.Dto.User;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
+using System.Text;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -41,7 +42,20 @@ namespace MyProject.Controllers
         [HttpPost]
         public async Task<UserDto> Post([FromForm] UserDto value)
         {
-            //לכתוב פה את הקריאה לפונקציה שעושה המרה
+            if (value.file != null)
+            {
+                // צור שם ייחודי לקובץ
+                var fileName = Guid.NewGuid() + Path.GetExtension(value.file.FileName);
+                var path = Path.Combine(Environment.CurrentDirectory, "IMG/", fileName);
+
+                // שמור את הקובץ על הדיסק
+                using var fs = new FileStream(path, FileMode.Create);
+                await value.file.CopyToAsync(fs);
+
+                // שמור את שם הקובץ ב-DTO (כ־byte[])
+                value.AvatarUrl = Encoding.UTF8.GetBytes(fileName);
+            }
+
             return await service.Add(value);
         }
 
