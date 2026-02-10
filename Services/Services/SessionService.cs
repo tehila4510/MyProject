@@ -22,7 +22,12 @@ namespace Services.Services
         }
         public async Task<SessionDto> Add(SessionDto item)
         {
-           var s=await repository.AddItem(mapper.Map<Session>(item));
+            var session = mapper.Map<Session>(item);
+
+            session.StartedAt = DateTime.UtcNow;
+
+            var s = await repository.AddItem(session);
+
             return mapper.Map<SessionDto>(s);
         }
 
@@ -46,6 +51,7 @@ namespace Services.Services
         public async Task<SessionDto> Update(int id, SessionDto item)
         {
             var session =await repository.UpdateItem(id, mapper.Map<Session>(item));
+           // session.EndedAt = DateTime.UtcNow;
             return mapper.Map<SessionDto>(session);
         }
     }

@@ -6,7 +6,6 @@ namespace Repository.Entities
 {
     public class Session
     {
-        //זה אמור להיות באלגוריתם ולא בדטה
         public int SessionId { get; set; } // PK
         public int UserId { get; set; } // FK
         public User User { get; set; }

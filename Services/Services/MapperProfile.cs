@@ -16,23 +16,49 @@ namespace Services.Services
         private readonly string imagesPath;
         public MapperProfile()
         {
-            imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "IMG");
+            imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "ProfileImages");
 
-            // Entity -> DTO  (שליפה מהמערכת)
+            //User
+
             // Entity -> DTO
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.AvatarUrl,
                            opt => opt.MapFrom(src => Encoding.UTF8.GetBytes(src.AvatarUrl)))
                 .ForMember(dest => dest.file, opt => opt.Ignore());
-
             // DTO -> Entity
             CreateMap<UserDto, User>()
                 .ForMember(dest => dest.AvatarUrl,
                            opt => opt.MapFrom(src => src.AvatarUrl != null ? Encoding.UTF8.GetString(src.AvatarUrl) : null));
 
-            CreateMap<Session, SessionDto>().ReverseMap();
-            CreateMap<UserAnswer, UserAnswerDto>().ReverseMap();
-            CreateMap<UserSkillProgress, UserSkillProgressDto>().ReverseMap();
+            //UserAnswer
+
+            CreateMap<UserAnswer, UserAnswerDto>();
+            CreateMap<UserAnswerDto, UserAnswer>()
+                .ForMember(d => d.User, o => o.Ignore())
+                .ForMember(d => d.Question, o => o.Ignore())
+                .ForMember(d => d.Session, o => o.Ignore())
+                .ForMember(d => d.AnsweredAt, o => o.MapFrom(_ => DateTime.UtcNow));
+
+            //Session
+
+            CreateMap<Session, SessionDto>()
+                .ForMember(d => d.DurationInMinutes, 
+                o => o.MapFrom(s => s.StartedAt.HasValue && s.EndedAt.HasValue? (s.EndedAt.Value - s.StartedAt.Value).TotalMinutes : 0));
+
+            CreateMap<SessionDto, Session>()
+                .ForMember(d => d.User, o => o.Ignore())
+                .ForMember(d => d.UserAnswers, o => o.Ignore())
+                .ForMember(d => d.StartedAt, o => o.Ignore())
+                .ForMember(d => d.EndedAt, o => o.Ignore());
+
+            //UserSkillProgress
+
+            CreateMap<UserSkillProgress, UserSkillProgressDto>();
+            CreateMap<UserSkillProgressDto, UserSkillProgress>()
+                .ForMember(d => d.User, o => o.Ignore());
+
+            //question
+
             CreateMap<Question, QuestionDto>().ReverseMap();
             CreateMap<QuestionOption, QuestionOptionDto>().ReverseMap();
         }
@@ -40,11 +66,7 @@ namespace Services.Services
 
         // --- פונקציות עזר ---
 
-        private byte[] ConvertImageToBytes(string base64String)
-        {
-            return !string.IsNullOrEmpty(base64String) ? Convert.FromBase64String(base64String) : Array.Empty<byte>();
-        }
-
+       
         private string ConvertBoolToStatus(bool flag)
         {
             return flag ? "Active" : "Inactive";

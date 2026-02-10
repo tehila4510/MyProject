@@ -17,8 +17,8 @@ namespace Repository.Entities
         public int QuestionTypeMask { get; set; }
 
         public AudioTypeEnum AudioType { get; set; }
-        public string AudioSource { get; set; }
-        public string ImageURL { get; set; }
+        public string? AudioSource { get; set; }
+        public string? ImageURL { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<QuestionOption> Options { get; set; } = new List<QuestionOption>();
