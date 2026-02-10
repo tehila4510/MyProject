@@ -30,9 +30,11 @@ namespace Services.Services
             await repository.DeleteItem(id);
         }
 
-        public Task<UserDto> Exist(LoginDto l)
+        public async Task<UserDto> Exist(LoginDto l)
         {
-            throw new NotImplementedException();
+            var users = await GetAll();
+            var user= users.FirstOrDefault(u => u.Email == l.Email && u.PasswordHash == l.Password);
+            return user!=null? user : null;
         }
 
         public async Task<List<UserDto>> GetAll()
