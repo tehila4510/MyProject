@@ -1,4 +1,5 @@
-﻿using Common.Dto.UserProgress;
+﻿using Common;
+using Common.Dto.UserProgress;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace MyProject.Controllers
 
         private IConfiguration _configuration;
         private readonly IService<UserAnswerDto> service;
-        public UserAnswerController()
+        public UserAnswerController(IConfiguration _configuration, IService<UserAnswerDto> service)
         {
             this._configuration = _configuration;
             this.service = service;
@@ -22,37 +23,94 @@ namespace MyProject.Controllers
 
         // GET: api/<UserAnswerController>
         [HttpGet]
-        public async Task<List<UserAnswerDto>>  Get()
+        public async Task<IActionResult>  Get()
         {
-            return await service.GetAll();
+            try
+            {
+                var lst = await service.GetAll();
+                return Ok(lst);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+             catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // GET api/<UserAnswerController>/5
         [HttpGet("{id}")]
-        public async Task<UserAnswerDto> Get(int id)
-        {   return await service.GetById(id);
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                var ua = await service.GetById(id);
+                return Ok(ua);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // POST api/<UserAnswerController>
         [HttpPost]
-        public async Task<UserAnswerDto> Post([FromForm] UserAnswerDto value)
+        public async Task<IActionResult> Post([FromForm] UserAnswerDto value)
         {
             //יש מה להוסיף פה
-            return await service.Add(value);
+            try
+            {
+                var v = await service.Add(value);
+                return CreatedAtAction(nameof(Get), new { id = v.AnswerId }, v);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // PUT api/<UserAnswerController>/5
         [HttpPut("{id}")]
-        public async Task<UserAnswerDto> Put(int id, [FromBody] UserAnswerDto value)
+        public async Task<IActionResult> Put(int id, [FromBody] UserAnswerDto value)
         {
-           return  await service.Update(id, value);
+            try
+            {
+               var update= await service.Update(id, value);
+                return Ok(update);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+             catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // DELETE api/<UserAnswerController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            await service.Delete(id);
+            try
+            {
+                await service.Delete(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+             catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
     }
 }

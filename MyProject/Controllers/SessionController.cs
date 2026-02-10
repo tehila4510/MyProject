@@ -1,5 +1,7 @@
-﻿using Common.Dto.Sessions;
+﻿using Common;
+using Common.Dto.Sessions;
 using Microsoft.AspNetCore.Mvc;
+using Repository.Entities;
 using Services.Interfaces;
 using System.Threading.Tasks;
 
@@ -20,37 +22,91 @@ namespace MyProject.Controllers
         }
         // GET: api/<SessionController>
         [HttpGet]
-        public async Task<List<SessionDto>> Get()
+        public async Task<IActionResult> Get()
         {
-            return await service.GetAll();
+            try
+            {
+                var lst = await service.GetAll();
+                return Ok(lst);
+            }
+            catch(NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // GET api/<SessionController>/5
         [HttpGet("{id}")]
-        public async Task<SessionDto> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return await service.GetById(id);
+            try { var s=await service.GetById(id);
+                return Ok(s);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // POST api/<SessionController>
         [HttpPost]
-        public async Task<SessionDto> Post([FromForm] SessionDto value)
+        public async Task<IActionResult> Post([FromForm] SessionDto value)
         {
-            return await service.Add(value);
+            try
+            {
+                var v = await service.Add(value);
+                return CreatedAtAction(nameof(Get), new { id = v.SessionId }, v);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+
         }
 
         // PUT api/<SessionController>/5
         [HttpPut("{id}")]
-        public async Task<SessionDto> Put(int id, [FromBody] SessionDto value)
+        public async Task<IActionResult> Put(int id, [FromBody] SessionDto value)
         {
-            return await service.Update(id, value);
+            try { 
+                var updatedSession = await service.Update(id, value);
+                return Ok(updatedSession);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // DELETE api/<SessionController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            await service.Delete(id);
+            try
+            {
+                await service.Delete(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
     }
 }

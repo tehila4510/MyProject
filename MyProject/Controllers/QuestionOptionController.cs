@@ -3,6 +3,7 @@ using Repository.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using System.Threading.Tasks;
+using Common;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,9 +22,21 @@ namespace MyProject.Controllers
         }
         // GET: api/<QuestionOptionController>
         [HttpGet]
-        public async Task<List<QuestionOptionDto>> Get()
+        public async Task<IActionResult> Get()
         {
-            return await service.GetAll();
+            try
+            {
+                var lst = await service.GetAll();
+                return Ok(lst);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // GET api/<QuestionOptionController>/5
@@ -35,23 +48,55 @@ namespace MyProject.Controllers
 
         // POST api/<QuestionOptionController>
         [HttpPost]
-        public async Task<QuestionOptionDto> Post([FromForm] QuestionOptionDto value)
+        public async Task<IActionResult> Post([FromForm] QuestionOptionDto value)
         {
-            return await service.Add(value);
+            try
+            {
+                var v = await service.Add(value);
+                return CreatedAtAction(nameof(Get), new { id = v.OptionId }, v);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // PUT api/<QuestionOptionController>/5
         [HttpPut("{id}")]
-        public async Task<QuestionOptionDto> Put(int id, [FromBody] QuestionOptionDto value)
+        public async Task<IActionResult> Put(int id, [FromBody] QuestionOptionDto value)
         {
-            return await service.Update(id,value);
+            try
+            {
+                var updatedOption = await service.Update(id, value);
+                return Ok(updatedOption);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // DELETE api/<QuestionOptionController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            await service.Delete(id);
+            try
+            {
+                await service.Delete(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
     }
 }

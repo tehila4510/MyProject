@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Common;
 using Common.Dto.Sessions;
 using Repository.Entities;
 using Repository.Interfaces;
@@ -32,24 +33,34 @@ namespace Services.Services
         }
 
         public async Task Delete(int id)
-        {
+        {   var session = await repository.GetById(id);
+            if(session == null)
+                throw new KeyNotFoundException($"Session with id {id} not found");
+
             await repository.DeleteItem(id);
         }
 
         public async Task<List<SessionDto>> GetAll()
         {
             var sessions = await repository.GetAll();
+            if(sessions == null || sessions.Count == 0)
+                throw new NotFoundException("No sessions found");
             return mapper.Map<List<SessionDto>>(sessions);
         }
 
         public async Task<SessionDto> GetById(int id)
         {
             var session =await repository.GetById(id);
+            if(session == null)
+                throw new KeyNotFoundException($"Session with id {id} not found");
             return mapper.Map<SessionDto>(session);
         }
 
         public async Task<SessionDto> Update(int id, SessionDto item)
         {
+            var existingSession = await repository.GetById(id);
+            if(existingSession == null)
+                throw new KeyNotFoundException($"Session with id {id} not found");
             var session =await repository.UpdateItem(id, mapper.Map<Session>(item));
            // session.EndedAt = DateTime.UtcNow;
             return mapper.Map<SessionDto>(session);

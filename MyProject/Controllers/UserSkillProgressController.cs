@@ -3,6 +3,7 @@ using Repository.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using System.Threading.Tasks;
+using Common;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,37 +22,91 @@ namespace MyProject.Controllers
         }
         // GET: api/<UserSkillProgressController>
         [HttpGet]
-        public async Task<List<UserSkillProgressDto>> Get()
+        public async Task<IActionResult> Get()
         {
-            return await service.GetAll();
+            try
+            {
+                var lst = await service.GetAll();
+                return Ok(lst);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // GET api/<UserSkillProgressController>/5
         [HttpGet("{id}")]
-        public async Task<UserSkillProgressDto> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return await service.GetById(id);
+            try {var UserSkillProgress= await service.GetById(id);
+                return Ok(UserSkillProgress);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // POST api/<UserSkillProgressController>
         [HttpPost]
-        public async Task<UserSkillProgressDto> Post([FromForm] UserSkillProgressDto value)
+        public async Task<IActionResult> Post([FromForm] UserSkillProgressDto value)
         {
-            return await service.Add(value);
+            try
+            {
+                var v = await service.Add(value);
+                // id = v.SkillId - צריך לשנות
+                return CreatedAtAction(nameof(Get), new { id = v.SkillId }, v);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // PUT api/<UserSkillProgressController>/5
         [HttpPut("{id}")]
-        public async Task<UserSkillProgressDto> Put(int id, [FromBody] UserSkillProgressDto value)
+        public async Task<IActionResult> Put(int id, [FromBody] UserSkillProgressDto value)
         {
-            return await service.Update(id, value);
+            try
+            {
+               var update= await service.Update(id, value);
+                return Ok(update);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // DELETE api/<UserSkillProgressController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            await service.Delete(id);
+            try {
+                await service.Delete(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
     }
 }

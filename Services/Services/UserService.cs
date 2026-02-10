@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Common;
 using Common.Dto.User;
 using Repository.Entities;
 using Repository.Interfaces;
@@ -27,6 +28,9 @@ namespace Services.Services
 
         public async Task Delete(int id)
         {
+            var user = await repository.GetById(id);
+            if(user == null)
+                throw new KeyNotFoundException($"User with id {id} not found");
             await repository.DeleteItem(id);
         }
 
@@ -40,17 +44,24 @@ namespace Services.Services
         public async Task<List<UserDto>> GetAll()
         {
             var users = await repository.GetAll();
+            if(users == null || users.Count == 0)
+                throw new NotFoundException("No users found");
             return mapper.Map<List<UserDto>>(users);
         }
 
         public async Task<UserDto> GetById(int id)
         {
             var user = await repository.GetById(id);
+            if(user == null)
+                throw new KeyNotFoundException($"User with id {id} not found");
             return mapper.Map<UserDto>(user);
         }
 
         public async Task<UserDto> Update(int id, UserDto item)
         {
+            var existingUser = await repository.GetById(id);
+            if(existingUser == null)
+                throw new KeyNotFoundException($"User with id {id} not found");
             var user=await repository.UpdateItem(id, mapper.Map<User>(item));
             return mapper.Map<UserDto>(user);
         }
