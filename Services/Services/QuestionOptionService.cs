@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Common;
 using Common.Dto.Question;
 using Repository.Entities;
 using Repository.Interfaces;
@@ -26,12 +27,19 @@ namespace Services.Services
 
         public async Task Delete(int id)
         {
+            var qo = await repository.GetById(id);
+            if (qo == null)
+            {
+                throw new KeyNotFoundException($"Option with id {id} not found");
+            }
             await repository.DeleteItem(id);
         }
 
         public async Task<List<QuestionOptionDto>> GetAll()
         {
             var qo= await repository.GetAll();
+            if (qo == null || qo.Count == 0)
+                throw new NotFoundException("No options found");
             return mapper.Map<List<QuestionOptionDto>>(qo);
         }
 
@@ -43,6 +51,11 @@ namespace Services.Services
 
         public Task<QuestionOptionDto> Update(int id, QuestionOptionDto item)
         {
+            var existingOption = repository.GetById(id).Result;
+
+            if (existingOption == null)       
+                throw new KeyNotFoundException($"Option with id {id} not found");
+
             var qo = repository.UpdateItem(id, mapper.Map<QuestionOption>(item));
             return mapper.Map<Task<QuestionOptionDto>>(qo);
         }

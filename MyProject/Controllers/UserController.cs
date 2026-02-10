@@ -1,4 +1,5 @@
-﻿using Common.Dto.User;
+﻿using Common;
+using Common.Dto.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Services.Interfaces;
@@ -31,9 +32,21 @@ namespace MyProject.Controllers
 
         // GET: api/<UserController>
         [HttpGet]
-        public async Task<List<UserDto>> Get()
+        public async Task<IActionResult> Get()
         {
-            return await service.GetAll();
+            try
+            {
+                var lst = await service.GetAll();
+                return Ok(lst);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         [HttpPost("login")]
@@ -76,9 +89,21 @@ namespace MyProject.Controllers
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
-        public async Task<UserDto> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return await service.GetById(id);
+            try
+            {
+                var user = await service.GetById(id);
+                return Ok(user);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // POST api/<UserController>
@@ -104,16 +129,39 @@ namespace MyProject.Controllers
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public async Task<UserDto> Put(int id, [FromBody] UserDto value)
+        public async Task<IActionResult> Put(int id, [FromBody] UserDto value)
         {
-            return await service.Update(id, value);
+            try { 
+                 var updatedUser = await service.Update(id, value);
+                return Ok(updatedUser);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            await service.Delete(id);
+            try
+            {
+                await service.Delete(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         
