@@ -1,5 +1,6 @@
-﻿using Repository.Entities;
+﻿using Common.StaticData;
 using Microsoft.EntityFrameworkCore;
+using Repository.Entities;
 using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -17,19 +18,9 @@ namespace Repository.Repositories
         }
         public async Task<UserSkillProgress> AddItem(UserSkillProgress item)
         {
-            ctx.UserSkillProgress.AddAsync(item);
+            await ctx.UserSkillProgress.AddAsync(item);
             await ctx.Save();
             return item;
-        }
-
-        public async Task DeleteItem(int UserId, int skillID)
-        {
-           var usp=await ctx.UserSkillProgress.FirstOrDefaultAsync(x=> x.UserId == UserId && x.SkillId==skillID);
-            if (usp != null)
-            {
-                ctx.UserSkillProgress.Remove(usp);
-                await ctx.Save();
-            }
         }
 
         public async Task<List<UserSkillProgress>> GetAll()
@@ -37,32 +28,28 @@ namespace Repository.Repositories
             return await ctx.UserSkillProgress.ToListAsync();
         }
 
-        public async Task<UserSkillProgress> GetById(int UserId, int skillID)
+        public async Task DeleteItem(int id)
         {
-            return await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserId == UserId && x.SkillId == skillID);
+            var usp = await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserSkillProgressId==id);
+            if (usp != null)
+            {
+                ctx.UserSkillProgress.Remove(usp);
+                await ctx.Save();
+            }
         }
-    
-        public async Task<UserSkillProgress> UpdateItem(int UserId, int skillID, UserSkillProgress item)
+        public async Task<UserSkillProgress> GetById(int id)
         {
-            var usp = await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserId == UserId && x.SkillId == skillID);
+            return await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserSkillProgressId == id);
+        }
+        public async Task<UserSkillProgress> UpdateItem(int id, UserSkillProgress item)
+        {
+            var usp = await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserSkillProgressId == id);
             if (usp != null)
             {
                 usp.Mastery = item.Mastery;
                 usp.LastPracticed = item.LastPracticed;
             }
             return usp;
-        }
-        public Task DeleteItem(int id)
-        {
-            throw new NotImplementedException();
-        }
-        public Task<UserSkillProgress> GetById(int id)
-        {
-            throw new NotImplementedException();
-        }
-        public Task<UserSkillProgress> UpdateItem(int id, UserSkillProgress item)
-        {
-            throw new NotImplementedException();
         }
     }
 }

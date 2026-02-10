@@ -14,6 +14,6 @@ namespace Repository.Interfaces
         public DbSet<QuestionOption> QuestionOptions { get; set; }
         public DbSet<UserAnswer> UserAnswers { get; set; }
         public DbSet<Session> Sessions { get; set; }
-        public Task Save();
+        public Task<int> Save();
     }
 }

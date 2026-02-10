@@ -4,6 +4,7 @@ using DataContext.model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataContext.Migrations
 {
     [DbContext(typeof(GlottieContext))]
-    partial class GlottieContextModelSnapshot : ModelSnapshot
+    [Migration("20260210224248_update")]
+    partial class update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,11 +210,11 @@ namespace DataContext.Migrations
 
             modelBuilder.Entity("Repository.Entities.UserSkillProgress", b =>
                 {
-                    b.Property<int>("UserSkillProgressId")
+                    b.Property<int>("userSkillProgressId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserSkillProgressId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userSkillProgressId"));
 
                     b.Property<DateTime?>("LastPracticed")
                         .HasColumnType("datetime2");
@@ -225,7 +228,7 @@ namespace DataContext.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("UserSkillProgressId");
+                    b.HasKey("userSkillProgressId");
 
                     b.HasIndex("UserId");
 

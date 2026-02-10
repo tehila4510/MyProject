@@ -63,8 +63,7 @@ namespace MyProject.Controllers
             try
             {
                 var v = await service.Add(value);
-                // id = v.SkillId - צריך לשנות
-                return CreatedAtAction(nameof(Get), new { id = v.SkillId }, v);
+                return CreatedAtAction(nameof(Get), new { id = v.UserSkillProgressId }, v);
             }
             catch (Exception)
             {
