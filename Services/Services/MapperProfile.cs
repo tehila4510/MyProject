@@ -28,7 +28,9 @@ namespace Services.Services
             // DTO -> Entity
             CreateMap<UserDto, User>()
                 .ForMember(dest => dest.AvatarUrl,
-                           opt => opt.MapFrom(src => src.AvatarUrl != null ? Encoding.UTF8.GetString(src.AvatarUrl) : null));
+                           opt => opt.MapFrom(src => src.AvatarUrl != null ? Encoding.UTF8.GetString(src.AvatarUrl) : null))
+                                .ForMember(d => d.Role, o => o.Ignore());
+
 
             //UserAnswer
 

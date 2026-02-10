@@ -9,6 +9,8 @@ namespace DataContext.model
     public class GlottieContext : DbContext,IContext
     {
         private readonly string? _connection;
+        public GlottieContext() { }
+
         public GlottieContext(string _connection) {
             this._connection = _connection;
         }
@@ -22,10 +24,7 @@ namespace DataContext.model
         public DbSet<UserAnswer> UserAnswers { get; set; }
         public DbSet<Session> Sessions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<UserSkillProgress>()
-                .HasKey(usp => new { usp.UserId, usp.SkillId });
-
+        { 
             // הקשר בין Session ל-UserAnswer
             modelBuilder.Entity<UserAnswer>()
                 .HasOne(ua => ua.Session)
@@ -35,9 +34,9 @@ namespace DataContext.model
 
             base.OnModelCreating(modelBuilder);
         }
-        public Task Save()
+        public async Task<int> Save()
         {
-            return SaveChangesAsync();
+            return await SaveChangesAsync();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

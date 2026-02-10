@@ -48,7 +48,6 @@ namespace Repository.Repositories
             {
                 s.StartedAt=item.StartedAt;
                 s.EndedAt=item.EndedAt;
-                s.QuestionsCount=item.QuestionsCount;
                 s.Score=item.Score;
                 s.UserId=item.UserId;
                 await ctx.Save();

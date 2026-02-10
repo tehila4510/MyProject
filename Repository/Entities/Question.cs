@@ -16,10 +16,10 @@ namespace Repository.Entities
         // Bitmask במקום מערך ENUM
         public int QuestionTypeMask { get; set; }
 
-        public AudioTypeEnum AudioType { get; set; }
+        public AudioTypeEnum? AudioType { get; set; }
         public string? AudioSource { get; set; }
         public string? ImageURL { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<QuestionOption> Options { get; set; } = new List<QuestionOption>();
         public ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();

@@ -55,7 +55,6 @@ namespace Repository.Repositories
                 u.Streak = item.Streak;
                 u.Hearts = item.Hearts;
                 u.LastActivity = item.LastActivity;
-                u.IsPro = item.IsPro;
                 u.ProUntil = item.ProUntil;
                 
                 await ctx.Save();      

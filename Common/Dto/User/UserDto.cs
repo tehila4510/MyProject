@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Common.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -21,8 +22,6 @@ namespace Common.Dto.User
         public int Hearts { get; set; } = 5;        
         public DateTime? LastActivity { get; set; }
         public DateTime CreatedAt { get; set; }
-
-        public bool IsPro { get; set; }             
         public DateTime? ProUntil { get; set; }     
     }
 }
