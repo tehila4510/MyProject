@@ -19,7 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="IMG\" />
+    <Folder Include="QuestionImages\" />
+    <Folder Include="ProfileImages\" />
   </ItemGroup>
 
 
