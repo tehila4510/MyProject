@@ -1,6 +1,9 @@
 ﻿using Common.Dto.User;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Services.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,22 +16,62 @@ namespace MyProject.Controllers
     public class UserController : ControllerBase
     {
 
-        private IConfiguration _configuration;
+        private IConfiguration configuration;
         private readonly IService<UserDto> service;
         public readonly IsExist<UserDto> isExist;
-        public UserController(IConfiguration _configuration, IService<UserDto> service, IsExist<UserDto> isExist)
+        
+        public UserController(IConfiguration _configuration, IService<UserDto> service,IsExist<UserDto> isExist)
         {
-            this._configuration = _configuration;
+            this.configuration = _configuration;
             this.service = service;
             this.isExist = isExist;
         }
-        //להוסיף פונקציה של לוגין ורגיסטר
+        //להוסיף פונקציה של רגיסטר
+
 
         // GET: api/<UserController>
         [HttpGet]
         public async Task<List<UserDto>> Get()
         {
             return await service.GetAll();
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto login)
+        {
+            var u =await isExist.Exist(login);
+            if (u != null)
+                return Ok(new { Token = GenerateToken(u) });
+            return Unauthorized("User does not exist");
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromForm] UserDto register)
+        {
+            // בדיקה אם המשתמש כבר קיים
+            var exists = await isExist.Exist(new LoginDto { Email=register.Email,Password=register.PasswordHash});
+            if (exists != null)
+                return BadRequest("User already exists");
+
+
+            // טיפול בקובץ אם יש Avatar
+            if (register.file != null)
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(register.file.FileName);
+                var path = Path.Combine(Environment.CurrentDirectory, "ProfileImages/", fileName);
+
+                using var fs = new FileStream(path, FileMode.Create);
+                await register.file.CopyToAsync(fs);
+
+                register.AvatarUrl = Encoding.UTF8.GetBytes(fileName);
+            }
+
+            // שמירה ב‑DB דרך Add הקיים
+            var createdUser = await service.Add(register);
+            // יצירת טוקן למשתמש חדש
+            var token = GenerateToken(createdUser);
+
+            return Ok(new { Token = token, UserId = createdUser.UserId });
         }
 
         // GET api/<UserController>/5
@@ -46,7 +89,7 @@ namespace MyProject.Controllers
             {
                 // צור שם ייחודי לקובץ
                 var fileName = Guid.NewGuid() + Path.GetExtension(value.file.FileName);
-                var path = Path.Combine(Environment.CurrentDirectory, "IMG/", fileName);
+                var path = Path.Combine(Environment.CurrentDirectory, "ProfileImages/", fileName);
 
                 // שמור את הקובץ על הדיסק
                 using var fs = new FileStream(path, FileMode.Create);
@@ -73,8 +116,19 @@ namespace MyProject.Controllers
             await service.Delete(id);
         }
 
-        //1. יצירת טוקן
-        //2. private BabyDto GetCurrentUser()
-
+        
+        private string GenerateToken(UserDto u)
+        {
+            var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
+            var claims = new[] {
+            new Claim(ClaimTypes.Name,u.Name),
+             };
+            var token = new JwtSecurityToken(configuration["Jwt:Issuer"], configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(15),
+                signingCredentials: credentials);
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
 }
