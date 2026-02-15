@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.ComponentModel.DataAnnotations;
 
 namespace Common.Dto.Questions
 {
@@ -9,6 +10,7 @@ namespace Common.Dto.Questions
         public int QuestionId { get; set; }
 
         //זה בחזרה מהשרת
+        [Required(ErrorMessage = "This field is required")]
         public int? SelectedOptionId { get; set; }
 
         //אחרי הבדיקה

@@ -59,7 +59,7 @@ namespace MyProject.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] UserDto register)
+        public async Task<IActionResult> Register([FromForm] UserUpdateDto register)
         {
             // בדיקה אם המשתמש כבר קיים
             var exists = await isExist.Exist(new LoginDto { Email=register.Email,Password=register.PasswordHash});
@@ -106,30 +106,9 @@ namespace MyProject.Controllers
             }
         }
 
-        // POST api/<UserController>
-        [HttpPost]
-        public async Task<UserDto> Post([FromForm] UserDto value)
-        {
-            if (value.file != null)
-            {
-                // צור שם ייחודי לקובץ
-                var fileName = Guid.NewGuid() + Path.GetExtension(value.file.FileName);
-                var path = Path.Combine(Environment.CurrentDirectory, "ProfileImages/", fileName);
-
-                // שמור את הקובץ על הדיסק
-                using var fs = new FileStream(path, FileMode.Create);
-                await value.file.CopyToAsync(fs);
-
-                // שמור את שם הקובץ ב-DTO (כ־byte[])
-                value.AvatarUrl = Encoding.UTF8.GetBytes(fileName);
-            }
-
-            return await service.Add(value);
-        }
-
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] UserDto value)
+        public async Task<IActionResult> Put(int id, [FromBody] UserUpdateDto value)
         {
             try { 
                  var updatedUser = await service.Update(id, value);

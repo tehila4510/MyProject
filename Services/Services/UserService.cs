@@ -20,10 +20,15 @@ namespace Services.Services
                 this.repository = repository;
                 this.mapper = mapper;
         }
-        public async Task<UserDto> Add(UserDto item)
+        public async Task<UserDto> Add(UserUpdateDto item)
         {
             var user = await repository.AddItem(mapper.Map<User>(item));
             return mapper.Map<UserDto>(user);
+        }
+
+        public Task<UserDto> Add(UserDto item)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task Delete(int id)
@@ -57,13 +62,18 @@ namespace Services.Services
             return mapper.Map<UserDto>(user);
         }
 
-        public async Task<UserDto> Update(int id, UserDto item)
+        public async Task<UserDto> Update(int id, UserUpdateDto item)
         {
             var existingUser = await repository.GetById(id);
             if(existingUser == null)
                 throw new KeyNotFoundException($"User with id {id} not found");
             var user=await repository.UpdateItem(id, mapper.Map<User>(item));
             return mapper.Map<UserDto>(user);
+        }
+
+        public Task<UserDto> Update(int id, UserDto item)
+        {
+            throw new NotImplementedException();
         }
     }
 }

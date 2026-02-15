@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Common.Dto.Sessions
@@ -7,6 +8,8 @@ namespace Common.Dto.Sessions
     public class SessionDto
     {
         public int SessionId { get; set; } // PK
+        [Required(ErrorMessage = "This field is required")]
+
         public int UserId { get; set; } // FK
         public int Score { get; set; }
 

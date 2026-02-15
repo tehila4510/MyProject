@@ -16,13 +16,13 @@ namespace Services.Services
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddRepository();
-            services.AddScoped<IService<UserDto>, UserService>();
+            //services.AddScoped<IService<UserDto>, UserService>();
             services.AddScoped<IsExist<UserDto>, UserService>();
+
             services.AddScoped<IService<QuestionOptionDto>, QuestionOptionService>();
             services.AddScoped<IService<QuestionDto>, QuestionService>();
             services.AddScoped<IService<SessionDto>, SessionService>();
             services.AddScoped<IService<UserAnswerDto>, UserAnswerService>();
-            services.AddScoped<IService<UserDto>, UserService>();
             services.AddScoped<IService<UserSkillProgressDto>, UserSkillProgressService>();
             services.AddScoped<IOpenAi, Chat>();
 

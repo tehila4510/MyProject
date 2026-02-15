@@ -31,7 +31,17 @@ namespace Services.Services
                            opt => opt.MapFrom(src => src.AvatarUrl != null ? Encoding.UTF8.GetString(src.AvatarUrl) : null))
                                 .ForMember(d => d.Role, o => o.Ignore());
 
-
+            CreateMap<UserUpdateDto, User>()
+                .ForMember(dest => dest.AvatarUrl,
+                           opt => opt.MapFrom(src => src.AvatarUrl != null ? Encoding.UTF8.GetString(src.AvatarUrl) : null))
+                .ForMember(d => d.Role, o => o.Ignore())
+                .ForMember(d => d.CurrentLevel, o => o.Ignore())
+                .ForMember(d => d.Xp, o => o.Ignore())
+                .ForMember(d => d.Streak, o => o.Ignore())
+                .ForMember(d => d.Hearts, o => o.Ignore())
+                .ForMember(d => d.LastActivity, o => o.Ignore())
+                .ForMember(d => d.CreatedAt, o => o.Ignore())
+                .ForMember(d => d.ProUntil, o => o.Ignore());
             //UserAnswer
 
             CreateMap<UserAnswer, UserAnswerDto>();
