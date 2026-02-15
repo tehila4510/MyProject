@@ -24,6 +24,8 @@ namespace Services.Services
             services.AddScoped<IService<UserAnswerDto>, UserAnswerService>();
             services.AddScoped<IService<UserDto>, UserService>();
             services.AddScoped<IService<UserSkillProgressDto>, UserSkillProgressService>();
+            services.AddScoped<IOpenAi, Chat>();
+
             return services;
         }
     }

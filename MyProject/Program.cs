@@ -19,12 +19,14 @@ namespace MyProject
             var builder = WebApplication.CreateBuilder(args);
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 
+            builder.Services.AddHttpClient();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
 
             builder.Services.AddSingleton<IContext>(new GlottieContext(connection));
+            builder.Services.AddSingleton<IOpenAi, Chat>(); // Chat עם HttpClient
             builder.Services.AddAutoMapper(typeof(MapperProfile));
             builder.Services.AddServices();
 
@@ -44,8 +46,8 @@ namespace MyProject
             //authorize -אימות 
             //authenticate -הרשאות גישה
 
-            //app.UseAuthentication();
-            //app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
 
