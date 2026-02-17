@@ -80,11 +80,11 @@ namespace MyProject.Controllers
             }
 
             // שמירה ב‑DB דרך Add הקיים
-            var createdUser = await service.Add(register);
-            // יצירת טוקן למשתמש חדש
-            var token = GenerateToken(createdUser);
+            //var createdUser = await service.Add(register);
+            //// יצירת טוקן למשתמש חדש
+            //var token = GenerateToken(createdUser);
 
-            return Ok(new { Token = token, UserId = createdUser.UserId });
+            return Ok(/*new { Token = token, UserId = createdUser.UserId }*/);
         }
 
         // GET api/<UserController>/5
@@ -111,8 +111,8 @@ namespace MyProject.Controllers
         public async Task<IActionResult> Put(int id, [FromBody] UserUpdateDto value)
         {
             try { 
-                 var updatedUser = await service.Update(id, value);
-                return Ok(updatedUser);
+                // var updatedUser = await service.Update(id, value);
+                return Ok(/*updatedUser*/);
             }
             catch (KeyNotFoundException ex)
             {
