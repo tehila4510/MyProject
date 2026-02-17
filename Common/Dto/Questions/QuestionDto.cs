@@ -17,7 +17,11 @@ namespace Common.Dto.Question
 
             [Required(ErrorMessage = "This field is required")]
         public int LevelId { get; set; }
-        //title
+
+            [Required(ErrorMessage = "This field is required")]
+            [StringLength(200, MinimumLength = 5, ErrorMessage = "Length must be between 5 and 200 characters")]
+        public string Title { get; set; }
+
             [Required(ErrorMessage = "This field is required")]
             [StringLength(200, MinimumLength = 5, ErrorMessage = "Length must be between 5 and 200 characters")]
         public string QuestionText { get; set; }

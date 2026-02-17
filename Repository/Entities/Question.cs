@@ -12,6 +12,7 @@ namespace Repository.Entities
         public int SkillId { get; set; }
         public int LevelId { get; set; }
         public string QuestionText { get; set; }
+        public string Title { get; set; }
 
         // Bitmask במקום מערך ENUM
         public int QuestionTypeMask { get; set; }
