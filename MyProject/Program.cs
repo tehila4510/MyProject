@@ -33,6 +33,14 @@ namespace MyProject
             builder.Services.AddAutoMapper(typeof(MapperProfile));
             builder.Services.AddServices();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReact",
+                    p => p.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+            });
+
 
             var ttsService = new Speech();
 
@@ -63,13 +71,14 @@ namespace MyProject
 
             var app = builder.Build();
 
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors("AllowReact");
             app.UseHttpsRedirection();
 
 
