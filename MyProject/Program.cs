@@ -1,16 +1,12 @@
-
-using DataContext;
-using Microsoft.Extensions.DependencyInjection;
+using DataContext.model;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using Repository.Interfaces;
 using Services.Interfaces;
 using Services.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Builder;
-using DataContext.model;
-using System.Speech.Synthesis;
-using System.Media;
-
-
+using System.Text;
 
 namespace MyProject
 {
@@ -18,72 +14,84 @@ namespace MyProject
     {
         public static void Main(string[] args)
         {
-
             var builder = WebApplication.CreateBuilder(args);
+
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 
-            builder.Services.AddHttpClient();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
+            // Swagger + Bearer
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    }] = new string[] { }
+                });
+            });
+
+            builder.Services.AddHttpClient();
 
             builder.Services.AddSingleton<IContext>(new GlottieContext(connection));
-            builder.Services.AddSingleton<IOpenAi, Chat>(); // Chat עם HttpClient
+            builder.Services.AddSingleton<IOpenAi, Chat>();
+
             builder.Services.AddAutoMapper(typeof(MapperProfile));
             builder.Services.AddServices();
 
+            // Authentication - JWT
+            builder.Services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(
+                                    builder.Configuration["Jwt:Key"]!
+                                )
+                            )
+                    };
+                });
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowReact",
-                    p => p.AllowAnyOrigin()
-                          .AllowAnyHeader()
-                          .AllowAnyMethod());
+                options.AddPolicy("AllowReact", p =>
+                    p.AllowAnyOrigin()
+                     .AllowAnyHeader()
+                     .AllowAnyMethod());
             });
-
-
-            //var ttsService = new Speech();
-
-            //// 1. השמעת טקסט עם קול ברירת מחדל
-            //ttsService.Speak("Hello! This is the default voice.");
-
-            //// 2. השמעת טקסט עם קול מסוים (אם קיים)
-            //ttsService.Speak("Hello! This is David's voice.", "Microsoft David Desktop");
-
-            //// 3. הצגת כל הקולות המותקנים במערכת
-            //var voices = ttsService.GetInstalledVoices();
-            //Console.WriteLine("Installed voices:");
-            //foreach (var voice in voices)
-            //{
-            //    Console.WriteLine(voice);
-            //}
-
-            //// 4. בחירה דינמית של קול על ידי המשתמש
-            //Console.WriteLine("Enter the name of the voice you want to use:");
-            //string chosenVoice = Console.ReadLine();
-            //Console.WriteLine("Enter the text to speak:");
-            //string text = Console.ReadLine();
-            //ttsService.Speak(text, chosenVoice);
-
-            //Console.WriteLine("Done. Press any key to exit.");
-            //Console.ReadKey();
-            //ttsService.Speak("Hello! This is a free text-to-speech example in English.");
 
             var app = builder.Build();
 
-
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            app.UseCors("AllowReact");
+
             app.UseHttpsRedirection();
 
-
-            //authorize -אימות 
-            //authenticate -הרשאות גישה
+            app.UseCors("AllowReact");
 
             app.UseAuthentication();
             app.UseAuthorization();
