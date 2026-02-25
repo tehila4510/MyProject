@@ -3,6 +3,7 @@ using Common.Dto.User;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Services.Interfaces;
+using Services.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -17,75 +18,42 @@ namespace MyProject.Controllers
     public class UserController : ControllerBase
     {
 
-        private IConfiguration configuration;
-        private readonly IService<UserDto> service;
-        public readonly IsExist<UserDto> isExist;
-        
-        public UserController(IConfiguration _configuration, IService<UserDto> service,IsExist<UserDto> isExist)
-        {
-            this.configuration = _configuration;
-            this.service = service;
-            this.isExist = isExist;
-        }
-        //להוסיף פונקציה של רגיסטר
+        private readonly IUserService service;
 
-
-        // GET: api/<UserController>
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        public UserController(IUserService _userService)
         {
-            try
-            {
-                var lst = await service.GetAll();
-                return Ok(lst);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "An error occurred while processing your request.");
-            }
+            this.service = _userService;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto login)
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var u =await isExist.Exist(login);
-            if (u != null)
-                return Ok(new { Token = GenerateToken(u) });
-            return Unauthorized("User does not exist");
+            try
+            {
+                var token = await service.Login(dto);
+                return Ok(new { Token = token });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized("Invalid credentials");
+            }
         }
+
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] UserUpdateDto register)
+        public async Task<IActionResult> Register([FromForm] UserUpdateDto dto)
         {
-            // בדיקה אם המשתמש כבר קיים
-            var exists = await isExist.Exist(new LoginDto { Email=register.Email,Password=register.PasswordHash});
-            if (exists != null)
-                return BadRequest("User already exists");
-
-
-            // טיפול בקובץ אם יש Avatar
-            if (register.file != null)
+            try
             {
-                var fileName = Guid.NewGuid() + Path.GetExtension(register.file.FileName);
-                var path = Path.Combine(Environment.CurrentDirectory, "ProfileImages/", fileName);
-
-                using var fs = new FileStream(path, FileMode.Create);
-                await register.file.CopyToAsync(fs);
-
-                register.AvatarUrl = Encoding.UTF8.GetBytes(fileName);
+                var user = await service.Register(dto);
+                return Ok(user);
             }
-
-            // שמירה ב‑DB דרך Add הקיים
-            //var createdUser = await service.Add(register);
-            //// יצירת טוקן למשתמש חדש
-            //var token = GenerateToken(createdUser);
-
-            return Ok(/*new { Token = token, UserId = createdUser.UserId }*/);
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
+
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
@@ -111,8 +79,8 @@ namespace MyProject.Controllers
         public async Task<IActionResult> Put(int id, [FromBody] UserUpdateDto value)
         {
             try { 
-                // var updatedUser = await service.Update(id, value);
-                return Ok(/*updatedUser*/);
+                var updatedUser = await service.Update(id, value);
+                return Ok(updatedUser);
             }
             catch (KeyNotFoundException ex)
             {
@@ -141,21 +109,6 @@ namespace MyProject.Controllers
             {
                 return StatusCode(500, "An error occurred while processing your request.");
             }
-        }
-
-        
-        private string GenerateToken(UserDto u)
-        {
-            var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
-            var claims = new[] {
-            new Claim(ClaimTypes.Name,u.Name),
-             };
-            var token = new JwtSecurityToken(configuration["Jwt:Issuer"], configuration["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddMinutes(15),
-                signingCredentials: credentials);
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

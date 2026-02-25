@@ -17,8 +17,7 @@ namespace Services.Services
         {
             services.AddRepository();
             //services.AddScoped<IService<UserDto>, UserService>();
-            services.AddScoped<IsExist<UserDto>, UserService>();
-
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IService<QuestionOptionDto>, QuestionOptionService>();
             services.AddScoped<IService<QuestionDto>, QuestionService>();
             services.AddScoped<IService<SessionDto>, SessionService>();
