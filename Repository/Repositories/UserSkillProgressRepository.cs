@@ -9,7 +9,7 @@ using System.Text;
 namespace Repository.Repositories
 {
     // לא ביצעתי הורשה מהממשק הרפוזיטורי כי יש פה 2 מפתחות ראשיים
-    public class UserSkillProgressRepository :IRepository<UserSkillProgress>
+    public class UserSkillProgressRepository : IProgressRepository
     {
         private readonly IContext ctx;
         public UserSkillProgressRepository(IContext ctx)
@@ -27,29 +27,31 @@ namespace Repository.Repositories
         {
             return await ctx.UserSkillProgress.ToListAsync();
         }
-
-        public async Task DeleteItem(int id)
+       
+        public async Task<UserSkillProgress> GetById(int userId,int skillId)
         {
-            var usp = await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserSkillProgressId==id);
-            if (usp != null)
-            {
-                ctx.UserSkillProgress.Remove(usp);
-                await ctx.Save();
-            }
+            return await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserId == userId && x.SkillId==skillId);
         }
-        public async Task<UserSkillProgress> GetById(int id)
+        public async Task<UserSkillProgress> UpdateItem(int userId, int skillId, UserSkillProgress item)
         {
-            return await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserSkillProgressId == id);
-        }
-        public async Task<UserSkillProgress> UpdateItem(int id, UserSkillProgress item)
-        {
-            var usp = await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserSkillProgressId == id);
+            var usp = await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserId == userId && x.SkillId == skillId);
             if (usp != null)
             {
                 usp.Mastery = item.Mastery;
                 usp.LastPracticed = item.LastPracticed;
             }
             return usp;
+        }
+
+      
+        public async Task DeleteItem(int userId, int skillId)
+        {
+            var usp = await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserId == userId && x.SkillId==skillId);
+            if (usp != null)
+            {
+                ctx.UserSkillProgress.Remove(usp);
+                await ctx.Save();
+            }
         }
     }
 }
