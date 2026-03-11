@@ -14,7 +14,7 @@ namespace Services.Services
     {
         private readonly IRepository<QuestionOption> repository;
         private readonly IMapper mapper;
-        public QuestionOptionService()
+        public QuestionOptionService(IRepository<QuestionOption> repository, IMapper mapper)
         {
             this.repository = repository;
             this.mapper = mapper;

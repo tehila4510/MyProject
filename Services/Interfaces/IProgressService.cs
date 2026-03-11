@@ -15,5 +15,7 @@ namespace Services.Interfaces
         Task<UserSkillProgressDto> Add(UserSkillProgressDto item);
         Task<UserSkillProgressDto> Update(int userId, int skillId, UserSkillProgressDto item);
         Task Delete(int userId, int skillId);
+
+        Task UpdateSkillProgress(int userId, int skillId, double score);
     }
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using DataContext.model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -52,8 +53,13 @@ namespace MyProject
             builder.Services.AddSingleton<IOpenAi, Chat>();
 
             builder.Services.AddAutoMapper(typeof(MapperProfile));
-            builder.Services.AddServices();
 
+            //var provider = builder.Services.BuildServiceProvider();
+            //var mapper = provider.GetRequiredService<IMapper>();
+            //mapper.ConfigurationProvider.AssertConfigurationIsValid();
+
+            builder.Services.AddServices();
+            builder.Services.AddMemoryCache();
             // Authentication - JWT
             builder.Services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

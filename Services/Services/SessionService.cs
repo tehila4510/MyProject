@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using Common;
 using Common.Dto.Sessions;
+using Common.Dto.UserProgress;
+using Microsoft.VisualBasic;
 using Repository.Entities;
 using Repository.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Services.Services
 {
@@ -17,18 +20,14 @@ namespace Services.Services
 
         public SessionService(IRepository<Session> repository, IMapper mapper)
         {
-            this.mapper = mapper;
             this.repository = repository;
-
+            this.mapper = mapper;
         }
         public async Task<SessionDto> Add(SessionDto item)
         {
             var session = mapper.Map<Session>(item);
-
             session.StartedAt = DateTime.UtcNow;
-
             var s = await repository.AddItem(session);
-
             return mapper.Map<SessionDto>(s);
         }
 
@@ -36,10 +35,8 @@ namespace Services.Services
         {   var session = await repository.GetById(id);
             if(session == null)
                 throw new KeyNotFoundException($"Session with id {id} not found");
-
             await repository.DeleteItem(id);
         }
-
         public async Task<List<SessionDto>> GetAll()
         {
             var sessions = await repository.GetAll();
@@ -54,15 +51,13 @@ namespace Services.Services
             if(session == null)
                 throw new KeyNotFoundException($"Session with id {id} not found");
             return mapper.Map<SessionDto>(session);
-        }
-
+        }   
         public async Task<SessionDto> Update(int id, SessionDto item)
         {
             var existingSession = await repository.GetById(id);
             if(existingSession == null)
                 throw new KeyNotFoundException($"Session with id {id} not found");
             var session =await repository.UpdateItem(id, mapper.Map<Session>(item));
-           // session.EndedAt = DateTime.UtcNow;
             return mapper.Map<SessionDto>(session);
         }
     }

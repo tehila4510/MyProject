@@ -4,9 +4,6 @@ using Common.Dto.Sessions;
 using Common.Dto.User;
 using Common.Dto.UserProgress;
 using Repository.Entities;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
 namespace Services.Services
@@ -14,9 +11,11 @@ namespace Services.Services
     public class MapperProfile : Profile
     {
         private readonly string imagesPath;
+        private readonly string questionImagePath;
         public MapperProfile()
         {
-            imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "ProfileImages");
+           imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "ProfileImages");
+           questionImagePath= Path.Combine(Directory.GetCurrentDirectory(), "QuestionImages");
 
             //User
 
@@ -49,19 +48,21 @@ namespace Services.Services
                 .ForMember(d => d.User, o => o.Ignore())
                 .ForMember(d => d.Question, o => o.Ignore())
                 .ForMember(d => d.Session, o => o.Ignore())
-                .ForMember(d => d.AnsweredAt, o => o.MapFrom(_ => DateTime.UtcNow));
+                .ForMember(d => d.IsCorrect, o => o.Ignore());
+
 
             //Session
 
             CreateMap<Session, SessionDto>()
-                .ForMember(d => d.DurationInMinutes, 
-                o => o.MapFrom(s => s.StartedAt.HasValue && s.EndedAt.HasValue? (s.EndedAt.Value - s.StartedAt.Value).TotalMinutes : 0));
+                .ForMember(d => d.DurationInMinutes,
+                o => o.MapFrom(s => s.StartedAt.HasValue && s.EndedAt.HasValue ? (s.EndedAt.Value - s.StartedAt.Value).TotalMinutes : 0));
 
             CreateMap<SessionDto, Session>()
                 .ForMember(d => d.User, o => o.Ignore())
                 .ForMember(d => d.UserAnswers, o => o.Ignore())
                 .ForMember(d => d.StartedAt, o => o.Ignore())
                 .ForMember(d => d.EndedAt, o => o.Ignore());
+
 
             //UserSkillProgress
 
@@ -71,14 +72,29 @@ namespace Services.Services
 
             //question
 
-            CreateMap<Question, QuestionDto>().ReverseMap();
-            CreateMap<QuestionOption, QuestionOptionDto>().ReverseMap();
+            CreateMap<Question, QuestionDto>()
+            .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+            .ForMember(dest => dest.file, opt => opt.Ignore());
+
+            CreateMap<QuestionDto, Question>()
+                .ForMember(dest => dest.QuestionTypeMask, opt => opt.Ignore())
+                .ForMember(dest => dest.AudioType, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.ImageURL, opt => opt.Ignore())
+                .ForMember(dest => dest.UserAnswers, opt => opt.Ignore());
+
+            //options
+            CreateMap<QuestionOption, QuestionOptionDto>()
+                 .ForMember(dest => dest.IsCorrect, opt => opt.Ignore());
+
+            CreateMap<QuestionOptionDto, QuestionOption>()
+                .ForMember(dest => dest.Question, opt => opt.Ignore());
         }
 
 
         // --- פונקציות עזר ---
 
-       
+
         private string ConvertBoolToStatus(bool flag)
         {
             return flag ? "Active" : "Inactive";

@@ -32,6 +32,11 @@ namespace DataContext.model
                 .HasForeignKey(ua => ua.SessionId)
                 .OnDelete(DeleteBehavior.Restrict); // או NoAction
 
+            modelBuilder.Entity<Question>()
+                .HasMany(q => q.Options)
+                .WithOne(o => o.Question)
+                .HasForeignKey(o => o.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade); ;
             base.OnModelCreating(modelBuilder);
         }
         public async Task<int> Save()

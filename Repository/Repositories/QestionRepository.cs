@@ -1,10 +1,6 @@
-﻿using Repository.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Repository.Entities;
 using Repository.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Text;
 
 namespace Repository.Repositories
 {
@@ -24,8 +20,8 @@ namespace Repository.Repositories
 
         public async Task DeleteItem(int id)
         {
-            var q =await ctx.Questions.FirstOrDefaultAsync(x => x.QuestionId == id);
-            if (q!=null)
+            var q = await ctx.Questions.FirstOrDefaultAsync(x => x.QuestionId == id);
+            if (q != null)
             {
                 ctx.Questions.Remove(q);
             }
@@ -34,14 +30,15 @@ namespace Repository.Repositories
 
         public Task<List<Question>> GetAll()
         {
-            return ctx.Questions.ToListAsync();
+            return ctx.Questions.Include(q => q.Options).ToListAsync();
         }
+
 
         public async Task<Question> GetById(int id)
         {
-            return await ctx.Questions.FirstOrDefaultAsync(x => x.QuestionId == id);
+            return await ctx.Questions.Include(q => q.Options)
+                   .FirstOrDefaultAsync(x => x.QuestionId == id);
         }
-
         public async Task<Question> UpdateItem(int id, Question item)
         {
             var q = await ctx.Questions.FirstOrDefaultAsync(x => x.QuestionId == id);
