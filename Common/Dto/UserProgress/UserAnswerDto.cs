@@ -8,7 +8,9 @@ namespace Common.Dto.UserProgress
 {
     public class UserAnswerDto
     {
-        public int AnswerId { get; set; }  
+        public int? AnswerId { get; set; }
+        [Required(ErrorMessage = "This field is required")]
+
         public int UserId { get; set; }
         [Required(ErrorMessage = "This field is required")]
 
@@ -20,7 +22,7 @@ namespace Common.Dto.UserProgress
         [Required(ErrorMessage = "This field is required")]
         public string UserAnswerText { get; set; }
 
-        public bool IsCorrect { get; set; }
+        public bool? IsCorrect { get; set; }
         public int? SelectedOptionId { get; set; }
     }
 }

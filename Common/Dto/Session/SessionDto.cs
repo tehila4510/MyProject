@@ -7,14 +7,17 @@ namespace Common.Dto.Sessions
 {
     public class SessionDto
     {
-        public int SessionId { get; set; } // PK
-        [Required(ErrorMessage = "This field is required")]
+        public int? SessionId { get; set; } // PK
 
+        [Required(ErrorMessage = "This field is required")]
         public int UserId { get; set; } // FK
+
+        [Required(ErrorMessage = "This field is required")]
         public int Score { get; set; }
 
+        [Required(ErrorMessage = "This field is required")]
         public int Xp { get; set; }
         //הוא השיג XP האם אמור להיות לי פה כמה 
-        public double DurationInMinutes { get; set; }
+        public double? DurationInMinutes { get; set; }
     }
 }

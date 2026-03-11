@@ -7,6 +7,7 @@ namespace Common.Dto.Questions
 {
     public class QuestionReviewDto
     {
+        [Required(ErrorMessage = "This field is required")]
         public int QuestionId { get; set; }
 
         //זה בחזרה מהשרת

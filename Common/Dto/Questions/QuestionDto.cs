@@ -9,8 +9,7 @@ namespace Common.Dto.Question
 {
     public class QuestionDto
     {
-
-        public int QuestionId { get; set; }
+        public int? QuestionId { get; set; }
 
             [Required(ErrorMessage = "This field is required")]
         public int SkillId { get; set; }
@@ -18,17 +17,21 @@ namespace Common.Dto.Question
             [Required(ErrorMessage = "This field is required")]
         public int LevelId { get; set; }
 
-            [Required(ErrorMessage = "This field is required")]
+        [Required(ErrorMessage = "This field is required")]
+        [StringLength(200, MinimumLength = 5, ErrorMessage = "Length must be between 5 and 200 characters")]
+        public string QuestionText { get; set; }
+
+        [Required(ErrorMessage = "This field is required")]
             [StringLength(200, MinimumLength = 5, ErrorMessage = "Length must be between 5 and 200 characters")]
         public string Title { get; set; }
 
-            [Required(ErrorMessage = "This field is required")]
-            [StringLength(200, MinimumLength = 5, ErrorMessage = "Length must be between 5 and 200 characters")]
-        public string QuestionText { get; set; }
+           
         public string? AudioSource { get; set; }
         public byte[]? ImageUrl { get; set; }
         public IFormFile? file { get; set; }
-        public ICollection<QuestionOptionDto>? Options { get; set; } = new List<QuestionOptionDto>();
+
+        [Required(ErrorMessage = "This field is required")]
+        public ICollection<QuestionOptionDto> Options { get; set; } = new List<QuestionOptionDto>();
 
     }
 }

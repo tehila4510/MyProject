@@ -7,7 +7,7 @@ namespace Common.Dto.UserProgress
 {
     public class UserSkillProgressDto
     {
-        public int UserSkillProgressId { get; set; }
+        public int? UserSkillProgressId { get; set; }
         [Required(ErrorMessage = "This field is required")]
 
         public int UserId { get; set; }
