@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Repository.Entities;
 using Repository.Interfaces;
+using System.Linq.Expressions;
 
 namespace Repository.Repositories
 {
@@ -32,7 +33,10 @@ namespace Repository.Repositories
         {
             return ctx.Questions.Include(q => q.Options).ToListAsync();
         }
-
+        public IQueryable<Question> GetByCondition(Expression<Func<Question, bool>> expression)
+        {
+            return ctx.Questions.Include(q => q.Options).Where(expression);
+        }
 
         public async Task<Question> GetById(int id)
         {

@@ -3,6 +3,7 @@ using Common;
 using Common.Dto.Questions;
 using Common.Dto.UserProgress;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Repository.Entities;
 using Repository.Interfaces;
@@ -68,38 +69,53 @@ namespace Services.Services
         }
 
 
-
         //--------------אלגוריתם-------------
 
-        public  async Task<QuestionReviewDto> SubmitAnswer(int userId, UserAnswerDto dto)
+        public async Task<QuestionReviewDto> SubmitAnswer(int userId, UserAnswerDto dto)
         {
-            var answer = mapper.Map<UserAnswer>(dto);
-            answer.UserId = userId;
-            answer.AnsweredAt = DateTime.UtcNow;
-            answer.TimeToAnswerMs = (TimeSpan)(DateTime.UtcNow - answer.AnsweredAt);
+            // שליפת ה-answer הקיים שנוצר ב-GetNextQuestion (שם נשמר זמן ההתחלה)
+            var answer = await repository.GetById((int)dto.AnswerId);
+            if (answer == null)
+                throw new KeyNotFoundException("Answer record not found");
 
             var question = await questionRepository.GetById(dto.QuestionId);
-            answer.IsCorrect = question.Options.First(o => o.OptionId == dto.SelectedOptionId).IsCorrect;
+            if (question == null)
+                throw new KeyNotFoundException("Question not found");
 
-            await repository.UpdateItem((int)dto.AnswerId, answer);
+            // חישוב זמן תשובה אמיתי - מזמן יצירת הרשומה ב-GetNextQuestion
+            var answeredAt = DateTime.UtcNow;
+            answer.TimeToAnswerMs = answeredAt - answer.AnsweredAt!.Value; // AnsweredAt נשמר ב-GetNextQuestion
+            answer.AnsweredAt = answeredAt;
+
+            answer.UserId = userId;
+            answer.QuestionId = dto.QuestionId;
+            answer.SessionId = dto.SessionId;
+            answer.UserAnswerText = dto.UserAnswerText;
+            answer.IsCorrect = question.Options
+                .First(o => o.OptionId == dto.SelectedOptionId).IsCorrect;
+
+            await repository.UpdateItem(answer.AnswerId, answer);
 
             // עדכון קאש
             var userAnswers = await GetUserAnswersFromCache(userId);
+            var existing = userAnswers.FirstOrDefault(a => a.AnswerId == answer.AnswerId);
+            if (existing != null) userAnswers.Remove(existing);
             userAnswers.Add(answer);
             _cache.Set($"UserAnswers_{userId}", userAnswers, TimeSpan.FromMinutes(30));
 
-            // הכנת Review DTO
-            var review = new QuestionReviewDto
+            // מציאת התשובה הנכונה להחזיר בחזרה ללקוח
+            var correctOption = question.Options.FirstOrDefault(o => o.IsCorrect);
+
+            return new QuestionReviewDto
             {
                 QuestionId = dto.QuestionId,
                 SelectedOptionId = dto.SelectedOptionId,
+                CorrectOptionId = correctOption?.OptionId.ToString(),
                 IsCorrect = answer.IsCorrect,
                 TimeToAnswerMs = answer.TimeToAnswerMs.TotalMilliseconds
             };
-            return review;
         }
 
-     
 
         //-------------פעולות עזר------------
         private async Task<List<UserAnswer>> GetUserAnswersFromCache(int userId)
@@ -107,8 +123,10 @@ namespace Services.Services
             string cacheKey = $"UserAnswers_{userId}";
             if (!_cache.TryGetValue(cacheKey, out List<UserAnswer> userAnswers))
             {
-                var allAnswers = await repository.GetAll(); // await כאן
-                userAnswers = allAnswers.Where(a => a.UserId == userId).ToList(); // ואז Where
+                userAnswers = await repository
+                    .GetByCondition(a => a.UserId == userId)
+                    .ToListAsync();
+
                 _cache.Set(cacheKey, userAnswers, TimeSpan.FromMinutes(30));
             }
             return userAnswers;

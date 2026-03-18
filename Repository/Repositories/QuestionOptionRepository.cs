@@ -4,6 +4,7 @@ using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq.Expressions;
 
 namespace Repository.Repositories
 {
@@ -33,6 +34,11 @@ namespace Repository.Repositories
         public async Task<List<QuestionOption>> GetAll()
         {
             return await ctx.QuestionOptions.ToListAsync();
+        }
+
+        public IQueryable<QuestionOption> GetByCondition(Expression<Func<QuestionOption, bool>> expression)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<QuestionOption> GetById(int id)

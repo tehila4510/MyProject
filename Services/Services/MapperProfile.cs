@@ -74,7 +74,10 @@ namespace Services.Services
 
             CreateMap<Question, QuestionDto>()
             .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
-            .ForMember(dest => dest.file, opt => opt.Ignore());
+            .ForMember(dest => dest.file, opt => opt.Ignore())
+            .ForMember(dest => dest.AnswerRecordId, opt => opt.Ignore());
+            
+
 
             CreateMap<QuestionDto, Question>()
                 .ForMember(dest => dest.QuestionTypeMask, opt => opt.Ignore())

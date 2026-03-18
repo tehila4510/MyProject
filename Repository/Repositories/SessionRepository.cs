@@ -4,6 +4,8 @@ using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
@@ -36,6 +38,11 @@ namespace Repository.Repositories
            return await ctx.Sessions.ToListAsync();
         }
 
+        public IQueryable<Session> GetByCondition(Expression<Func<Session, bool>> expression)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<Session> GetById(int id)
         {
            return await ctx.Sessions.FirstOrDefaultAsync(x => x.SessionId == id);
@@ -54,5 +61,6 @@ namespace Repository.Repositories
             }
             return s;
         }
+
     }
 }

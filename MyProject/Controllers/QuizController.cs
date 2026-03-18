@@ -53,9 +53,9 @@ namespace MyProject.Controllers
             {
                 return NotFound(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while processing your request.");
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -71,9 +71,9 @@ namespace MyProject.Controllers
 
                 return Ok(questionDto);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while processing your request.");
+                return StatusCode(500,ex.Message);
             }
         }
 

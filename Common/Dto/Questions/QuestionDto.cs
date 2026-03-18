@@ -9,6 +9,7 @@ namespace Common.Dto.Question
 {
     public class QuestionDto
     {
+        public int? AnswerRecordId { get; set; }
         public int? QuestionId { get; set; }
 
             [Required(ErrorMessage = "This field is required")]

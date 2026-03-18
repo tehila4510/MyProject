@@ -8,6 +8,7 @@ namespace Common.Dto.UserProgress
 {
     public class UserAnswerDto
     {
+        public int? AnswerRecordId { get; set; }
         public int? AnswerId { get; set; }
         [Required(ErrorMessage = "This field is required")]
 

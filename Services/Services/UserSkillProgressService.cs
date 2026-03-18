@@ -17,13 +17,15 @@ namespace Services.Services
     {
         private readonly IProgressRepository repository;
         private readonly IRepository<Question> questionRepository;
+        private readonly IRepository<User> userRepository;
 
         private readonly IMapper mapper;
-        public UserSkillProgressService(IProgressRepository repository, IMapper mapper, IRepository<Question> questionRepository)
+        public UserSkillProgressService(IProgressRepository repository, IMapper mapper, IRepository<Question> questionRepository, IRepository<User> userRepository)
         {
             this.repository = repository;
             this.mapper = mapper;
             this.questionRepository = questionRepository;
+            this.userRepository = userRepository;
         }
         public async Task<UserSkillProgressDto> Add(UserSkillProgressDto item)
         {
@@ -71,21 +73,51 @@ namespace Services.Services
             var p = await repository.GetById(userId, skillId);
         }
 
-        private async Task UpdateMastery(int userId, int questionId)
+
+        //--------------אלגוריתם----------------
+        public async Task UpdateUserLevelAfterSession(int userId, double sessionScore)
         {
-            var q = await questionRepository.GetById(questionId);
-            if (q == null)
-                throw new KeyNotFoundException($"Session with id {questionId} not found");
-            var skill = q.SkillId;
+            var user = await userRepository.GetById(userId);
+            if (user == null) return;
+
+            // ממוצע XP צבור → רמה כללית
+            // לדוגמה: כל 500 XP = רמה
+            int newLevel = (user.Xp / 500) + 1;
+            newLevel = Math.Clamp(newLevel, 1, 10);
+
+            if (newLevel != user.CurrentLevel)
+            {
+                user.CurrentLevel = newLevel;
+                await userRepository.UpdateItem(userId, user);
+            }
         }
 
-
-        private int MapMasteryToLevel(int mastery)
+        public async Task UpdateSkillProgress(int userId, int skillId, int isCorrect)
         {
-            if (mastery < 30) return 1;
-            if (mastery < 60) return 2;
-            if (mastery < 85) return 3;
-            return 4;
+            var allProgress = await repository.GetAll();
+            var skillProgress = allProgress
+                .FirstOrDefault(p => p.UserId == userId && p.SkillId == skillId);
+
+            if (skillProgress == null)
+            {
+                // יצירה ראשונית
+                skillProgress = new UserSkillProgress
+                {
+                    UserId = userId,
+                    SkillId = skillId,
+                    Mastery = isCorrect == 1 ? 5 : 0,
+                    LastPracticed = DateTime.UtcNow
+                };
+                await repository.AddItem(skillProgress);
+                return;
+            }
+
+            // עדכון Mastery - בין 0 ל-100
+            int delta = isCorrect == 1 ? 5 : -3; // נכון = +5, טעות = -3
+            skillProgress.Mastery = Math.Clamp(skillProgress.Mastery + delta, 0, 100);
+            skillProgress.LastPracticed = DateTime.UtcNow;
+
+            await repository.UpdateItem(skillProgress.UserId, skillProgress.SkillId, skillProgress);
         }
     }
 }

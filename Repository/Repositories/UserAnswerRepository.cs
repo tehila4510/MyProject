@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using Repository.Entities;
+using System.Linq.Expressions;
 
 
 namespace Repository.Repositories
@@ -36,6 +37,11 @@ namespace Repository.Repositories
         public async Task<List<UserAnswer>> GetAll()
         {
             return await ctx.UserAnswers.ToListAsync();
+        }
+
+        public IQueryable<UserAnswer> GetByCondition(Expression<Func<UserAnswer, bool>> expression)
+        {
+            return ctx.UserAnswers.Where(expression);
         }
 
         public async Task<UserAnswer> GetById(int id)

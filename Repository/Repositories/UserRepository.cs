@@ -4,6 +4,7 @@ using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq.Expressions;
 
 namespace Repository.Repositories
 {
@@ -34,6 +35,11 @@ namespace Repository.Repositories
         public async Task<List<User>> GetAll()
         {
             return await ctx.Users.ToListAsync();
+        }
+
+        public IQueryable<User> GetByCondition(Expression<Func<User, bool>> expression)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<User> GetById(int id)

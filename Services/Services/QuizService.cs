@@ -60,7 +60,6 @@ namespace Services.Services
             };
         }
 
-       
         public async Task<QuestionDto> GetNextQuestion(int userId,int sessionId,int? skillId)
         {
             return await questionService.GetNextQuestion(userId, sessionId,skillId);
@@ -77,25 +76,60 @@ namespace Services.Services
         //--------------פעולות עזר----------------
         private double CalculateSessionScore(List<UserAnswer> answers)
         {
-            if (!answers.Any())
-                return 0;
+            if (!answers.Any()) return 0;
 
-            double total = 0;
+            double totalWeighted = 0;
+            double maxPossible = 0;
 
             foreach (var answer in answers)
             {
+                // משקל הרמה - שאלה קשה שווה יותר
+                var question = answer.Question; // נטען ע"י Include
+                double levelMultiplier = question?.LevelId ?? 1;
+
+                // ניקוד מקסימלי אפשרי לשאלה זו
+                maxPossible += levelMultiplier * 1.0; // 1.0 = ניקוד מלא
+
                 if (!answer.IsCorrect)
                     continue;
 
+                // ניקוד בפועל
                 double timeWeight = GetTimeWeight(answer.TimeToAnswerMs);
+
+                // ספירת ניסיונות לשאלה זו בלבד
                 int attempts = answers.Count(a => a.QuestionId == answer.QuestionId);
                 double attemptWeight = GetAttemptWeight(attempts);
 
-                total += timeWeight * attemptWeight;
+                totalWeighted += levelMultiplier * timeWeight * attemptWeight;
             }
 
-            return (total / answers.Count) * 100;
+            if (maxPossible == 0) return 0;
+
+            // ציון מנורמל 0-100
+            return (totalWeighted / maxPossible) * 100;
         }
+        // XP מחושב בנפרד - לפי ביצועים
+        public int CalculateXpGained(List<UserAnswer> answers, double score)
+        {
+            int baseXp = 10; // XP בסיסי לסיום שיעור
+
+            // בונוס לפי ציון
+            int scoreBonus = score switch
+            {
+                >= 90 => 20,
+                >= 70 => 10,
+                >= 50 => 5,
+                _ => 0
+            };
+
+            // בונוס אם ענה על שאלות קשות
+            int hardQuestionBonus = answers
+                .Where(a => a.IsCorrect && (a.Question?.LevelId ?? 0) >= 4)
+                .Count() * 3;
+
+            return baseXp + scoreBonus + hardQuestionBonus;
+        }
+
         private double GetTimeWeight(TimeSpan time)
         {
             double seconds = time.TotalSeconds;
