@@ -49,15 +49,15 @@ namespace Services.Services
             return mapper.Map<QuestionOptionDto>(qo);
         }
 
-        public Task<QuestionOptionDto> Update(int id, QuestionOptionDto item)
+        public async Task<QuestionOptionDto> Update(int id, QuestionOptionDto item)
         {
-            var existingOption = repository.GetById(id).Result;
+            var existingOption = await repository.GetById(id);
 
-            if (existingOption == null)       
+            if (existingOption == null)
                 throw new KeyNotFoundException($"Option with id {id} not found");
-
-            var qo = repository.UpdateItem(id, mapper.Map<QuestionOption>(item));
-            return mapper.Map<Task<QuestionOptionDto>>(qo);
+            mapper.Map(item, existingOption);
+            var updated = await repository.UpdateItem(id, existingOption);
+            return mapper.Map<QuestionOptionDto>(updated);
         }
     }
 }

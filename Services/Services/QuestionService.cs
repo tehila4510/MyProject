@@ -95,21 +95,17 @@ namespace Services.Services
         }
         public async Task<QuestionDto> GetNextQuestion(int userId, int sessionId, int? skillId)
         {
-            // 1. רמת משתמש
             var user = await userRepository.GetById(userId);
             if (user == null) throw new KeyNotFoundException("User not found");
             int userLevel = user.CurrentLevel;
 
-            // 2. skillId
             skillId = skillId ?? new Random().Next(1, 9);
 
-            // 3. ✅ שאלות שכבר נשאלו בסשן - שאילתה ממוקדת
             var sessionAnsweredIds = await answerRepository
                 .GetByCondition(a => a.SessionId == sessionId)
                 .Select(a => a.QuestionId)
                 .ToHashSetAsync();
 
-            // 4. ✅ רק שאלות של ה-skill הזה שלא נשאלו - ישירות מה-DB
             var availableQuestions = await repository
                 .GetByCondition(q =>
                     q.SkillId == skillId &&
@@ -119,18 +115,13 @@ namespace Services.Services
 
             if (!availableQuestions.Any()) return null;
 
-            // 5. ✅ רק תשובות של המשתמש הזה מהקאש (כבר מסונן)
             var userAnswers = await GetUserAnswersFromCache(userId);
-            // GetUserAnswersFromCache כבר מסנן לפי userId - זה בסדר
-            // 6. חישוב streak ורמת יעד
             var sessionAnswers = userAnswers.Where(a => a.SessionId == sessionId).ToList();
             int correctStreak = GetCurrentCorrectStreak(sessionAnswers);
             int targetLevel = CalculateTargetLevel(userLevel, correctStreak);
 
-            // 7. בחירת שאלה
             var selectedQuestion = SelectBestQuestion(availableQuestions, userAnswers, targetLevel);
 
-            // 8. יצירת רשומת תשובה
             var answerRecord = new UserAnswer
             {
                 UserId = userId,

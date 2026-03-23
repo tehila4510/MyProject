@@ -3,6 +3,7 @@ using Common.Dto.Question;
 using Common.Dto.Sessions;
 using Common.Dto.User;
 using Common.Dto.UserProgress;
+using Common.Enums;
 using Repository.Entities;
 using System.Text;
 
@@ -14,8 +15,8 @@ namespace Services.Services
         private readonly string questionImagePath;
         public MapperProfile()
         {
-           imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "ProfileImages");
-           questionImagePath= Path.Combine(Directory.GetCurrentDirectory(), "QuestionImages");
+            imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "ProfileImages");
+            questionImagePath = Path.Combine(Directory.GetCurrentDirectory(), "QuestionImages");
 
             //User
 
@@ -28,7 +29,12 @@ namespace Services.Services
             CreateMap<UserDto, User>()
                 .ForMember(dest => dest.AvatarUrl,
                            opt => opt.MapFrom(src => src.AvatarUrl != null ? Encoding.UTF8.GetString(src.AvatarUrl) : null))
-                                .ForMember(d => d.Role, o => o.Ignore());
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+                .ForMember(dest => dest.CurrentLevel, opt => opt.MapFrom(_ => 1))
+                .ForMember(dest => dest.Xp, opt => opt.MapFrom(_ => 0))
+                .ForMember(dest => dest.Streak, opt => opt.MapFrom(_ => 0))
+                .ForMember(dest => dest.Hearts, opt => opt.MapFrom(_ => 5))
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(_ => UserRole.Registered));
 
             CreateMap<UserUpdateDto, User>()
                 .ForMember(dest => dest.AvatarUrl,
@@ -76,7 +82,7 @@ namespace Services.Services
             .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
             .ForMember(dest => dest.file, opt => opt.Ignore())
             .ForMember(dest => dest.AnswerRecordId, opt => opt.Ignore());
-            
+
 
 
             CreateMap<QuestionDto, Question>()
@@ -94,29 +100,6 @@ namespace Services.Services
                 .ForMember(dest => dest.Question, opt => opt.Ignore());
         }
 
-
-        // --- פונקציות עזר ---
-
-
-        private string ConvertBoolToStatus(bool flag)
-        {
-            return flag ? "Active" : "Inactive";
-        }
-
-        private bool ConvertStatusToBool(string status)
-        {
-            return status.Equals("Active", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private string ConvertDateToString(DateTime date)
-        {
-            return date.ToString("yyyy-MM-dd");
-        }
-
-        private DateTime ConvertStringToDate(string str)
-        {
-            return DateTime.TryParse(str, out var date) ? date : DateTime.MinValue;
-        }
     }
 
 

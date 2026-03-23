@@ -13,6 +13,8 @@ namespace Services.Services
     public class QuizService : IQuizService
     {
         private readonly IRepository<Session> sessionRepository;
+        private readonly IRepository<User> userRepository;
+
         private readonly IRepository<Question> questionRepository;
         private readonly IQuestionService questionService;
         private readonly IAnswerService answerService;
@@ -22,13 +24,16 @@ namespace Services.Services
             IRepository<Session> sessionRepository,
             IQuestionService questionService,
             IAnswerService answerService,
-            IProgressService progressService)
+            IProgressService progressService,
+            IRepository<User> userRepository
+           )
         {
             this.sessionRepository = sessionRepository;
             this.questionService = questionService;
             this.answerService = answerService;
             this.progressService = progressService;
             this.questionRepository = questionRepository;
+            this.userRepository = userRepository;
         }
         public async Task<int> StartSession(int userId)
         {
@@ -50,13 +55,24 @@ namespace Services.Services
             s.EndedAt = DateTime.UtcNow;
             double score = CalculateSessionScore(s.UserAnswers.ToList());
             s.Score = (int)Math.Round(score);
+            var xp= CalculateXpGained(s.UserAnswers.ToList(), score);
             await sessionRepository.UpdateItem(sessionId, s);
+
+            //עדכון היוזר
+            var user = await userRepository.GetById(s.UserId);
+            user.Xp += xp;
+            user.CurrentLevel = user.Xp / 100; // לדוגמה, כל 100 XP = רמה חדשה
+            user.Streak = user.LastActivity.HasValue && user.LastActivity.Value.Date == DateTime.UtcNow.Date.AddDays(-1) ? user.Streak + 1 : 1; 
+            user.LastActivity = DateTime.UtcNow;
+            await userRepository.UpdateItem(user.UserId, user);
+
             return new SessionDto
             {
                 SessionId = s.SessionId,
                 UserId = s.UserId,
                 DurationInMinutes = s.StartedAt.HasValue && s.EndedAt.HasValue ? (s.EndedAt.Value - s.StartedAt.Value).TotalMinutes : null,
-                Score = s.Score
+                Score = s.Score,
+                Xp= xp
             };
         }
 
@@ -83,20 +99,16 @@ namespace Services.Services
 
             foreach (var answer in answers)
             {
-                // משקל הרמה - שאלה קשה שווה יותר
-                var question = answer.Question; // נטען ע"י Include
+                var question = answer.Question;
                 double levelMultiplier = question?.LevelId ?? 1;
 
-                // ניקוד מקסימלי אפשרי לשאלה זו
-                maxPossible += levelMultiplier * 1.0; // 1.0 = ניקוד מלא
+                maxPossible += levelMultiplier * 1.0;
 
                 if (!answer.IsCorrect)
                     continue;
 
-                // ניקוד בפועל
                 double timeWeight = GetTimeWeight(answer.TimeToAnswerMs);
 
-                // ספירת ניסיונות לשאלה זו בלבד
                 int attempts = answers.Count(a => a.QuestionId == answer.QuestionId);
                 double attemptWeight = GetAttemptWeight(attempts);
 
@@ -105,7 +117,6 @@ namespace Services.Services
 
             if (maxPossible == 0) return 0;
 
-            // ציון מנורמל 0-100
             return (totalWeighted / maxPossible) * 100;
         }
         // XP מחושב בנפרד - לפי ביצועים

@@ -46,8 +46,8 @@ namespace MyProject.Controllers
         {
             try
             {
-                await service.EndSession(sessionId);
-                return Ok();
+               var session= await service.EndSession(sessionId);
+                return Ok(session);
             }
             catch (KeyNotFoundException ex)
             {

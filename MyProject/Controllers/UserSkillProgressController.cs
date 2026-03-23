@@ -14,8 +14,8 @@ namespace MyProject.Controllers
     public class UserSkillProgressController : ControllerBase
     {
         private IConfiguration _configuration;
-        private readonly IService<UserSkillProgressDto> service;
-        public UserSkillProgressController(IService<UserSkillProgressDto> service, IConfiguration configuration)
+        private readonly IProgressService service;
+        public UserSkillProgressController(IProgressService service, IConfiguration configuration)
         {
             this.service = service;
             _configuration = configuration;
@@ -41,9 +41,9 @@ namespace MyProject.Controllers
 
         // GET api/<UserSkillProgressController>/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(int userId,int skillId)
         {
-            try {var UserSkillProgress= await service.GetById(id);
+            try {var UserSkillProgress= await service.GetById(userId,skillId);
                 return Ok(UserSkillProgress);
             }
             catch (KeyNotFoundException ex)
@@ -73,11 +73,11 @@ namespace MyProject.Controllers
 
         // PUT api/<UserSkillProgressController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] UserSkillProgressDto value)
+        public async Task<IActionResult> Put(int userId,int skillId, [FromBody] UserSkillProgressDto value)
         {
             try
             {
-               var update= await service.Update(id, value);
+               var update= await service.Update(userId,skillId, value);
                 return Ok(update);
             }
             catch (KeyNotFoundException ex)
@@ -92,10 +92,10 @@ namespace MyProject.Controllers
 
         // DELETE api/<UserSkillProgressController>/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int userId,int skillId)
         {
             try {
-                await service.Delete(id);
+                await service.Delete(userId,skillId);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
