@@ -68,11 +68,6 @@ namespace Services.Services
             return mapper.Map<UserSkillProgressDto>(usp);
         }
 
-        public async Task UpdateSkillProgress(int userId, int skillId, double score)
-        {
-            var p = await repository.GetById(userId, skillId);
-        }
-
 
         //--------------אלגוריתם----------------
         public async Task UpdateUserLevelAfterSession(int userId, double sessionScore)
@@ -94,9 +89,7 @@ namespace Services.Services
 
         public async Task UpdateSkillProgress(int userId, int skillId, int isCorrect)
         {
-            var allProgress = await repository.GetAll();
-            var skillProgress = allProgress
-                .FirstOrDefault(p => p.UserId == userId && p.SkillId == skillId);
+            var skillProgress = await repository.GetById(userId, skillId);
 
             if (skillProgress == null)
             {

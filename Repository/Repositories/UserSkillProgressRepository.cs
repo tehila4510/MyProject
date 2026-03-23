@@ -39,6 +39,7 @@ namespace Repository.Repositories
             {
                 usp.Mastery = item.Mastery;
                 usp.LastPracticed = item.LastPracticed;
+                await ctx.Save();
             }
             return usp;
         }
