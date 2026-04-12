@@ -7,8 +7,8 @@ namespace Services.Interfaces
 {
     public interface IUserService
     {
-        Task<UserDto> Register(UserUpdateDto registerDto);
-        Task<string> Login(LoginDto loginDto); // מחזיר JWT
+        Task<object> Register(UserUpdateDto registerDto);
+        Task<object> Login(LoginDto loginDto); // מחזיר JWT
         Task<UserDto> GetById(int id);
         //Task<List<UserDto>> GetAll();
         Task<UserDto> Update(int id, UserUpdateDto updateDto);

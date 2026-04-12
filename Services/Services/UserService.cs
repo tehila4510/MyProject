@@ -21,14 +21,14 @@ namespace Services.Services
     public class UserService :IUserService
     {
         private readonly IRepository<User> repository;
-        private readonly IMapper mapper;
         private readonly IConfiguration configuration;
+        private readonly IMapper mapper;
 
         public UserService(IRepository<User> repository, IMapper mapper, IConfiguration configuration)
         {
                 this.repository = repository;
-                this.mapper = mapper;
                 this.configuration = configuration;
+                this.mapper = mapper;
         }
         public async Task<bool> UserExists(string email)
         {
@@ -52,17 +52,19 @@ namespace Services.Services
             return mapper.Map<UserDto>(user);
         }
 
-        public async Task<string> Login(LoginDto loginDto)
+        public async Task<object> Login(LoginDto loginDto)
         {
             var users = await repository.GetAll();
             var user = users.FirstOrDefault(u => u.Email == loginDto.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
                 throw new UnauthorizedAccessException("Invalid credentials");
 
-            return GenerateToken(mapper.Map<UserDto>(user));
+            var userDto = mapper.Map<UserDto>(user);
+            string token = GenerateToken(userDto);
+            return new { User = userDto, Token = token };
         }
 
-        public async Task<UserDto> Register(UserUpdateDto registerDto)
+        public async Task<object> Register(UserUpdateDto registerDto)
         {
             if (await UserExists(registerDto.Email))
                 throw new InvalidOperationException($"User with email {registerDto.Email} already exists");
@@ -81,7 +83,9 @@ namespace Services.Services
             var user = mapper.Map<User>(registerDto);
             var createdUser = await repository.AddItem(user);
 
-            return mapper.Map<UserDto>(createdUser);
+            var userDto= mapper.Map<UserDto>(createdUser);
+            var token= GenerateToken(userDto);
+            return new { User = userDto, Token = token };
         }
 
         public async Task<UserDto> Update(int id, UserUpdateDto updateDto)

@@ -11,7 +11,6 @@ namespace Common.Dto.User
         public int UserId { get; set; } // PK     
         public string Name { get; set; }
         public string Email { get; set; }
-        public string PasswordHash { get; set; }
         public byte[]? AvatarUrl { get; set; }
         public IFormFile? file { get; set; }
         public int CurrentLevel { get; set; }

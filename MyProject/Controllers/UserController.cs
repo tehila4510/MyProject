@@ -31,8 +31,8 @@ namespace MyProject.Controllers
         {
             try
             {
-                var token = await service.Login(dto);
-                return Ok(new { Token = token });
+                var obj = await service.Login(dto);
+                return Ok(obj);
             }
             catch (UnauthorizedAccessException)
             {
@@ -46,8 +46,8 @@ namespace MyProject.Controllers
         {
             try
             {
-                var user = await service.Register(dto);
-                return Ok(user);
+                var obj = await service.Register(dto);
+                return Ok(obj);
             }
             catch (InvalidOperationException ex)
             {
@@ -82,7 +82,7 @@ namespace MyProject.Controllers
         // PUT api/<UserController>/5
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] UserUpdateDto value)
+        public async Task<IActionResult> Put(int id, [FromForm] UserUpdateDto value)
         {
             try {
                 var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
