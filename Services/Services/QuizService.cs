@@ -53,15 +53,21 @@ namespace Services.Services
             if (s == null)
                 throw new KeyNotFoundException($"Session with id {sessionId} not found");
             s.EndedAt = DateTime.UtcNow;
+            
             double score = CalculateSessionScore(s.UserAnswers.ToList());
             s.Score = (int)Math.Round(score);
             var xp= CalculateXpGained(s.UserAnswers.ToList(), score);
+            s.Xp = xp;
+            s.TotalQuestions = total;
+            s.CorrectAnswers = s.UserAnswers.Count(a => a.IsCorrect);
+
+            // לרשום פה פונקציה של מחיקה של כל התשובות לשאלות הכפולות ולמחוק את כל התשובות הנכונות
             await sessionRepository.UpdateItem(sessionId, s);
 
             //עדכון היוזר
             var user = await userRepository.GetById(s.UserId);
             user.Xp += xp;
-            user.CurrentLevel = user.Xp / 100; // לדוגמה, כל 100 XP = רמה חדשה
+            user.CurrentLevel = user.Xp / 300; // לדוגמה, כל 100 XP = רמה חדשה
             user.Streak = user.LastActivity.HasValue && user.LastActivity.Value.Date == DateTime.UtcNow.Date.AddDays(-1) ? user.Streak + 1 : 1; 
             user.LastActivity = DateTime.UtcNow;
             await userRepository.UpdateItem(user.UserId, user);
@@ -72,7 +78,7 @@ namespace Services.Services
                 UserId = s.UserId,
                 DurationInMinutes = s.StartedAt.HasValue && s.EndedAt.HasValue ? (s.EndedAt.Value - s.StartedAt.Value).TotalMinutes : null,
                 Score = s.Score,
-                Xp= xp
+                Xp= xp,
             };
         }
 
@@ -90,8 +96,10 @@ namespace Services.Services
 
 
         //--------------פעולות עזר----------------
+        int total = 0;
         private double CalculateSessionScore(List<UserAnswer> answers)
         {
+            total = answers.Count;
             if (!answers.Any()) return 0;
 
             double totalWeighted = 0;
@@ -106,10 +114,11 @@ namespace Services.Services
 
                 if (!answer.IsCorrect)
                     continue;
-
+                
                 double timeWeight = GetTimeWeight(answer.TimeToAnswerMs);
 
                 int attempts = answers.Count(a => a.QuestionId == answer.QuestionId);
+                total-=attempts-1;
                 double attemptWeight = GetAttemptWeight(attempts);
 
                 totalWeighted += levelMultiplier * timeWeight * attemptWeight;

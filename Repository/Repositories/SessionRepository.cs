@@ -57,6 +57,9 @@ namespace Repository.Repositories
                 s.EndedAt=item.EndedAt;
                 s.Score=item.Score;
                 s.UserId=item.UserId;
+                s.Xp=item.Xp;
+                s.CorrectAnswers=item.CorrectAnswers;
+                s.TotalQuestions=item.TotalQuestions;
                 await ctx.Save();
             }
             return s;

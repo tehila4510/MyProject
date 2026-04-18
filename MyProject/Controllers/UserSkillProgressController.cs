@@ -1,9 +1,11 @@
-﻿using Common.Dto.UserProgress;
-using Repository.Entities;
+﻿using Common;
+using Common.Dto.UserProgress;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Repository.Entities;
 using Services.Interfaces;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Common;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,6 +23,7 @@ namespace MyProject.Controllers
             _configuration = configuration;
         }
         // GET: api/<UserSkillProgressController>
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -40,10 +43,13 @@ namespace MyProject.Controllers
         }
 
         // GET api/<UserSkillProgressController>/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int userId,int skillId)
+        [Authorize]
+        [HttpGet("{skillId}")]
+        public async Task<IActionResult> Get(int skillId)
         {
-            try {var UserSkillProgress= await service.GetById(userId,skillId);
+            try {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var UserSkillProgress = await service.GetById(userId,skillId);
                 return Ok(UserSkillProgress);
             }
             catch (KeyNotFoundException ex)
@@ -57,13 +63,16 @@ namespace MyProject.Controllers
         }
 
         // POST api/<UserSkillProgressController>
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] UserSkillProgressDto value)
         {
             try
             {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                value.UserId = userId;
                 var v = await service.Add(value);
-                return CreatedAtAction(nameof(Get), new { id = v.UserSkillProgressId }, v);
+                return CreatedAtAction(nameof(Get), new { skillId = v.SkillId }, v);
             }
             catch (Exception)
             {
@@ -72,12 +81,15 @@ namespace MyProject.Controllers
         }
 
         // PUT api/<UserSkillProgressController>/5
+        [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int userId,int skillId, [FromBody] UserSkillProgressDto value)
+        public async Task<IActionResult> Put(int skillId, [FromBody] UserSkillProgressDto value)
         {
             try
             {
-               var update= await service.Update(userId,skillId, value);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                var update = await service.Update(userId,skillId, value);
                 return Ok(update);
             }
             catch (KeyNotFoundException ex)
@@ -91,10 +103,12 @@ namespace MyProject.Controllers
         }
 
         // DELETE api/<UserSkillProgressController>/5
+        [Authorize]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int userId,int skillId)
+        public async Task<IActionResult> Delete(int skillId)
         {
             try {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 await service.Delete(userId,skillId);
                 return NoContent();
             }

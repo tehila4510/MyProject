@@ -12,6 +12,11 @@ namespace Repository.Entities
         public DateTime? StartedAt { get; set; }
         public DateTime? EndedAt { get; set; }
         public int Score { get; set; }
+
+        //עוד לא עשיתי עליהם מיגריישין
+        public int Xp { get; set; }
+        public int TotalQuestions { get; set; }
+        public int CorrectAnswers { get; set; }
         public ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
 
     }

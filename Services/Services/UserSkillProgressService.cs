@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
+
 namespace Services.Services
 {
     public class UserSkillProgressService : IProgressService
@@ -49,15 +50,34 @@ namespace Services.Services
             return mapper.Map<List<UserSkillProgressDto>>(userSkillProgresses);
         }
 
-        public async Task<UserSkillProgressDto> GetById(int userId,int skillId)
+        public async Task<UserSkillProgressViewDto> GetById(int userId,int skillId)
         {
-            var userSkillProgress = await repository.GetById(userId, skillId);
-            if (userSkillProgress == null)
-                throw new KeyNotFoundException($"UserSkillProgress with id {userSkillProgress.UserSkillProgressId} not found");
+            var entity = await repository.GetById(userId, skillId);
+            if (entity == null)
+                throw new KeyNotFoundException($"UserSkillProgress with id {entity.UserSkillProgressId} not found");
 
-            return mapper.Map<UserSkillProgressDto>(userSkillProgress);
+            return new UserSkillProgressViewDto
+            {
+                SkillId = entity.SkillId,
+                SkillName = GetSkillName(entity.SkillId),
+
+                ProgressPercent = CalculateProgress(entity.Mastery),
+                // Accuracy = CalculateAccuracy(entity.CorrectAnswers, entity.TotalQuestions),
+
+                //WeeklyXp = GetWeeklyXp(userId, skillId),
+
+
+                Accuracy = 2,
+                WeeklyXp = [500, 40, 30, 200],
+                LastPracticed = entity.LastPracticed
+            };
         }
-
+        private string GetSkillName(int skillId)
+        {
+            return Skill.AllSkills.TryGetValue(skillId, out var skill)
+                ? skill.Name
+                : "Unknown";
+        }
         public async Task<UserSkillProgressDto> Update(int userId, int skillId, UserSkillProgressDto item)
         {
             var userSkillProgress = await repository.GetById(userId, skillId);
@@ -111,6 +131,40 @@ namespace Services.Services
             skillProgress.LastPracticed = DateTime.UtcNow;
 
             await repository.UpdateItem(skillProgress.UserId, skillProgress.SkillId, skillProgress);
+        }
+        private int CalculateProgress(int mastery)
+        {
+            return Math.Clamp(mastery, 0, 100);
+        }
+        private List<int> GetWeeklyXp(IEnumerable<Session> sessions)
+        {
+            var result = new int[7];
+
+            var startOfWeek = DateTime.UtcNow.Date.AddDays(-6);
+
+            foreach (var session in sessions)
+            {
+                if (!session.StartedAt.HasValue)
+                    continue;
+
+                var date = session.StartedAt.Value.Date;
+
+                if (date < startOfWeek)
+                    continue;
+
+                int dayIndex = (date - startOfWeek).Days;
+
+                result[dayIndex] += session.Xp;
+            }
+
+            return result.ToList();
+        }
+        private int CalculateAccuracy(int correctAnswers, int totalQuestions)
+        {
+            if (totalQuestions == 0)
+                return 0;
+
+            return (int)Math.Round((double)correctAnswers / totalQuestions * 100);
         }
     }
 }
