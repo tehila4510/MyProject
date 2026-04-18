@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using System.Threading.Tasks;
 
@@ -6,6 +7,7 @@ namespace MyProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ChatController : ControllerBase
     {
         private readonly IOpenAi _openAi;

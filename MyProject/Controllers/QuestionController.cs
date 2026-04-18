@@ -1,6 +1,8 @@
 ﻿using Common;
 using Common.Dto.Question;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Repository.Entities;
 using Services.Interfaces;
 using System.Threading.Tasks;
 
@@ -11,10 +13,12 @@ namespace MyProject.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class QuestionController : ControllerBase
     {
         private IConfiguration _configuration;
         private readonly IService<QuestionDto> service;
+        
 
         public QuestionController(IConfiguration _configuration, IService<QuestionDto> service)
         {
@@ -23,6 +27,7 @@ namespace MyProject.Controllers
         }
         // GET: api/<QuestionController>
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get()
         {
             try
@@ -34,9 +39,9 @@ namespace MyProject.Controllers
             {
                 return NotFound(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "An error occurred while processing your request.");
             }
         }
 
@@ -44,8 +49,12 @@ namespace MyProject.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            try { 
-                 var q= await service.GetById(id);
+            try {
+                var userId = GetUserId();
+
+                var q= await service.GetById(id);
+                //if (!User.IsInRole("Admin") && q.LevelId > user.CurrentLevel)
+                //       return Forbid("You do not have access to this question.");
                 return Ok(q);
             }
             catch (KeyNotFoundException ex)
@@ -57,9 +66,14 @@ namespace MyProject.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
-
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst("userId")?.Value);
+        }
         // POST api/<QuestionController>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Post([FromForm] QuestionDto value)
         {
             try
@@ -75,6 +89,8 @@ namespace MyProject.Controllers
 
         // PUT api/<QuestionController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Put(int id, [FromBody] QuestionDto value)
         {
             try { 
@@ -93,6 +109,8 @@ namespace MyProject.Controllers
 
         // DELETE api/<QuestionController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Delete(int id)
         {
             try

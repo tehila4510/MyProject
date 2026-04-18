@@ -1,10 +1,12 @@
 ﻿// Controllers/SkillController.cs
-using Microsoft.AspNetCore.Mvc;
-using Common.StaticData;
 using Common.Dto.Skills;
+using Common.StaticData;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class SkillController : ControllerBase
 {
     // GET /api/Skill
@@ -26,6 +28,8 @@ public class SkillController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<SkillDto> GetById(int id)
     {
+        if (id <= 0)
+            return BadRequest("Invalid id");
         if (!Skill.AllSkills.TryGetValue(id, out var skill))
             return NotFound();
 

@@ -2,18 +2,20 @@
 using Common;
 using Common.Dto.Sessions;
 using Common.Dto.UserProgress;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using Repository.Entities;
 using Repository.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Services
 {
-    public class SessionService : IService<SessionDto>
+    public class SessionService : IService<SessionDto>, ISessionService
     {
         private readonly IRepository<Session> repository;
         private readonly IMapper mapper;
@@ -39,9 +41,18 @@ namespace Services.Services
         }
         public async Task<List<SessionDto>> GetAll()
         {
+
             var sessions = await repository.GetAll();
-            if(sessions == null || sessions.Count == 0)
+            if (sessions == null || sessions.Count == 0)
                 throw new NotFoundException("No sessions found");
+            return mapper.Map<List<SessionDto>>(sessions);
+        }
+        public async Task<List<SessionDto>> GetByUser(int userId)
+        {
+
+            var sessions = await repository.GetByCondition(s => s.UserId == userId).ToListAsync();
+            if (sessions == null || sessions.Count == 0)
+                throw new NotFoundException("No sessions found for the specified user");
             return mapper.Map<List<SessionDto>>(sessions);
         }
 

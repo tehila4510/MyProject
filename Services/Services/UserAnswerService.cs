@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Common;
 using Common.Dto.Questions;
+using Common.Dto.Sessions;
 using Common.Dto.UserProgress;
 using Common.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +48,13 @@ namespace Services.Services
                 throw new NotFoundException("No user answers found");
             return mapper.Map<List<UserAnswerDto>>(ua);
         }
-
+        public async Task<List<UserAnswerDto>> GetByUser(int userId)
+        { 
+            var answers = await repository.GetByCondition(s => s.UserId == userId).ToListAsync();
+            if (answers == null || answers.Count == 0)
+                throw new NotFoundException("No answers found for the specified user");
+            return mapper.Map<List<UserAnswerDto>>(answers);
+        }
         public async Task<UserAnswerDto> GetById(int id)
         {
             var ua = await repository.GetById(id);
@@ -70,7 +77,9 @@ namespace Services.Services
 
         public async Task<QuestionReviewDto> SubmitAnswer(int userId, UserAnswerDto dto)
         {
-            // שליפת ה-answer הקיים שנוצר ב-GetNextQuestion (שם נשמר זמן ההתחלה)
+            if (dto.UserId != userId)
+                throw new UnauthorizedAccessException();
+
             var answer = await repository.GetById((int)dto.AnswerRecordId);
             if (answer == null)
                 throw new KeyNotFoundException("Answer record not found");
@@ -240,5 +249,7 @@ namespace Services.Services
                 .Replace("'", "'")        // גרשיים שונים (don't / don't)
                 .Replace("'", "'");
         }
+
+       
     }
 }

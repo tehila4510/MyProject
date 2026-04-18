@@ -13,14 +13,14 @@ namespace MyProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+
     public class UserSkillProgressController : ControllerBase
     {
-        private IConfiguration _configuration;
         private readonly IProgressService service;
-        public UserSkillProgressController(IProgressService service, IConfiguration configuration)
+        public UserSkillProgressController(IProgressService service)
         {
             this.service = service;
-            _configuration = configuration;
         }
         // GET: api/<UserSkillProgressController>
         [Authorize(Roles = "Admin")]
@@ -48,7 +48,7 @@ namespace MyProject.Controllers
         public async Task<IActionResult> Get(int skillId)
         {
             try {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var userId = GetUserId();
                 var UserSkillProgress = await service.GetById(userId,skillId);
                 return Ok(UserSkillProgress);
             }
@@ -69,7 +69,7 @@ namespace MyProject.Controllers
         {
             try
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var userId = GetUserId();
                 value.UserId = userId;
                 var v = await service.Add(value);
                 return CreatedAtAction(nameof(Get), new { skillId = v.SkillId }, v);
@@ -87,7 +87,7 @@ namespace MyProject.Controllers
         {
             try
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var userId = GetUserId();
 
                 var update = await service.Update(userId,skillId, value);
                 return Ok(update);
@@ -108,7 +108,7 @@ namespace MyProject.Controllers
         public async Task<IActionResult> Delete(int skillId)
         {
             try {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var userId = GetUserId();
                 await service.Delete(userId,skillId);
                 return NoContent();
             }
@@ -120,6 +120,11 @@ namespace MyProject.Controllers
             {
                 return StatusCode(500, "An error occurred while processing your request.");
             }
+        }
+
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         }
     }
 }

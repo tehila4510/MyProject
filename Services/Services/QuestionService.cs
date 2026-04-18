@@ -46,6 +46,7 @@ namespace Services.Services
             {
                 throw new KeyNotFoundException($"Question with id {id} not found");
             }
+
             await repository.DeleteItem(id);
         }
 
@@ -81,6 +82,7 @@ namespace Services.Services
 
         private async Task<List<UserAnswer>> GetUserAnswersFromCache(int userId)
         {
+            _cache.Remove($"UserAnswers_{userId}");
             string cacheKey = $"UserAnswers_{userId}";
             if (!_cache.TryGetValue(cacheKey, out List<UserAnswer> userAnswers))
             {
@@ -99,7 +101,7 @@ namespace Services.Services
             if (user == null) throw new KeyNotFoundException("User not found");
             int userLevel = user.CurrentLevel;
 
-            skillId = skillId ?? new Random().Next(1, 9);
+            skillId = skillId ??= Random.Shared.Next(1, 9);
 
             var sessionAnsweredIds = await answerRepository
                 .GetByCondition(a => a.SessionId == sessionId)
@@ -236,5 +238,7 @@ namespace Services.Services
 
             return weight;
         }
+
+        
     }
 }

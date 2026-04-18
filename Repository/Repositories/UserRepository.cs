@@ -39,7 +39,7 @@ namespace Repository.Repositories
 
         public IQueryable<User> GetByCondition(Expression<Func<User, bool>> expression)
         {
-            throw new NotImplementedException();
+            return ctx.Users.Where(expression);
         }
 
         public async Task<User> GetById(int id)
@@ -67,5 +67,6 @@ namespace Repository.Repositories
             }
             return u;
         }
+
     }
 }

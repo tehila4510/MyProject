@@ -1,9 +1,10 @@
-﻿using Common.Dto.Question;
-using Repository.Entities;
+﻿using Common;
+using Common.Dto.Question;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Repository.Entities;
 using Services.Interfaces;
 using System.Threading.Tasks;
-using Common;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,6 +12,7 @@ namespace MyProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class QuestionOptionController : ControllerBase
     {
         private IConfiguration _configuration;
@@ -22,6 +24,8 @@ namespace MyProject.Controllers
         }
         // GET: api/<QuestionOptionController>
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Get()
         {
             try
@@ -41,13 +45,30 @@ namespace MyProject.Controllers
 
         // GET api/<QuestionOptionController>/5
         [HttpGet("{id}")]
-        public async Task<QuestionOptionDto> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-           return await service.GetById(id);
+            try { 
+            var result = await service.GetById(id);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+
+            }   catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         // POST api/<QuestionOptionController>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Post([FromForm] QuestionOptionDto value)
         {
             try
@@ -63,7 +84,9 @@ namespace MyProject.Controllers
 
         // PUT api/<QuestionOptionController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] QuestionOptionDto value)
+        [Authorize(Roles = "Admin")]
+
+        public async Task<IActionResult> Put(int id, [FromForm] QuestionOptionDto value)
         {
             try
             {
@@ -82,6 +105,8 @@ namespace MyProject.Controllers
 
         // DELETE api/<QuestionOptionController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Delete(int id)
         {
             try

@@ -1,39 +1,43 @@
 ﻿using AutoMapper;
 using Common;
 using Common.Dto.User;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Crypto.Generators;
 using Repository.Entities;
 using Repository.Interfaces;
-
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace Services.Services
 {
     public class UserService :IUserService
     {
         private readonly IRepository<User> repository;
-        private readonly IConfiguration configuration;
+        private readonly ITokenService tokenService;
+        private readonly IFileService fileService;
         private readonly IMapper mapper;
 
-        public UserService(IRepository<User> repository, IMapper mapper, IConfiguration configuration)
+        public UserService(IRepository<User> repository, IMapper mapper, ITokenService tokenService, IFileService fileService)
         {
                 this.repository = repository;
-                this.configuration = configuration;
+                this.tokenService = tokenService;
+                this.fileService = fileService;
                 this.mapper = mapper;
         }
         public async Task<bool> UserExists(string email)
         {
-            var users = await repository.GetAll();
-            return users.Any(u => u.Email == email);
+            var exists = await repository
+            .GetByCondition(u => u.Email == email)
+             .AnyAsync();
+            return exists;
         }
 
         public async Task<List<UserDto>> GetAll()
@@ -54,13 +58,14 @@ namespace Services.Services
 
         public async Task<object> Login(LoginDto loginDto)
         {
-            var users = await repository.GetAll();
-            var user = users.FirstOrDefault(u => u.Email == loginDto.Email);
+            var user = await repository
+            .GetByCondition(u => u.Email == loginDto.Email).FirstOrDefaultAsync();
+    
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
                 throw new UnauthorizedAccessException("Invalid credentials");
 
             var userDto = mapper.Map<UserDto>(user);
-            string token = GenerateToken(userDto);
+            string token = tokenService.GenerateToken(userDto);
             return new { User = userDto, Token = token };
         }
 
@@ -74,17 +79,14 @@ namespace Services.Services
             // Save avatar file
             if (registerDto.file != null)
             {
-                var fileName = Guid.NewGuid() + System.IO.Path.GetExtension(registerDto.file.FileName);
-                var path = System.IO.Path.Combine(Environment.CurrentDirectory, "ProfileImages", fileName);
-                using var fs = new System.IO.FileStream(path, System.IO.FileMode.Create);
-                await registerDto.file.CopyToAsync(fs);
+                var fileName = await fileService.SaveFileAsync(registerDto.file);
                 registerDto.AvatarUrl = Encoding.UTF8.GetBytes(fileName);
             }
             var user = mapper.Map<User>(registerDto);
             var createdUser = await repository.AddItem(user);
 
             var userDto= mapper.Map<UserDto>(createdUser);
-            var token= GenerateToken(userDto);
+            var token= tokenService.GenerateToken(userDto);
             return new { User = userDto, Token = token };
         }
 
@@ -92,19 +94,17 @@ namespace Services.Services
         {
             var existingUser = await repository.GetById(id);
             if (existingUser == null) throw new KeyNotFoundException();
+            if (!string.IsNullOrEmpty(updateDto.Name))
+                existingUser.Name = updateDto.Name;
 
             if (!string.IsNullOrEmpty(updateDto.PasswordHash))
             {
                 updateDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateDto.PasswordHash);
             }
 
-            // Update avatar if provided
             if (updateDto.file != null)
             {
-                var fileName = Guid.NewGuid() + System.IO.Path.GetExtension(updateDto.file.FileName);
-                var path = System.IO.Path.Combine(Environment.CurrentDirectory, "ProfileImages", fileName);
-                using var fs = new System.IO.FileStream(path, System.IO.FileMode.Create);
-                await updateDto.file.CopyToAsync(fs);
+                var fileName = await fileService.SaveFileAsync(updateDto.file);
                 updateDto.AvatarUrl = Encoding.UTF8.GetBytes(fileName);
             }
 
@@ -117,27 +117,6 @@ namespace Services.Services
             if (user == null)
                 throw new KeyNotFoundException($"User with id {id} not found");
             await repository.DeleteItem(id);
-        }
-
-        private string GenerateToken(UserDto u)
-        {
-            var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, u.UserId.ToString()),
-                new Claim(ClaimTypes.Email, u.Email),
-                new Claim(ClaimTypes.Name, u.Name)
-            };
-            var token = new JwtSecurityToken(
-                issuer: configuration["Jwt:Issuer"],
-                audience: configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: credentials
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

@@ -2,15 +2,18 @@
 using Common.Dto.Question;
 using Common.Dto.Questions;
 using Common.Dto.UserProgress;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Entities;
 using Services.Interfaces;
 using Services.Services;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace MyProject.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class QuizController : ControllerBase
@@ -23,11 +26,12 @@ namespace MyProject.Controllers
             this.service = service;
         }
 
-        [HttpPost("start-session/{userId}")]
-        public async Task<ActionResult<int>> StartSession(int userId)
+        [HttpPost("start-session")]
+        public async Task<ActionResult<int>> StartSession()
         {
             try
             {
+                var userId = GetUserId();
                 var session = await service.StartSession(userId);
                 return Ok(session);
             }
@@ -59,12 +63,13 @@ namespace MyProject.Controllers
             }
         }
 
-        [HttpGet("next-question/{userId}/{sessionId}/{skillId?}")]
-        public async Task<ActionResult<QuestionDto>> GetNextQuestion(int userId,  int sessionId, int? skillId)
+        [HttpGet("next-question/{sessionId}/{skillId?}")]
+        public async Task<ActionResult<QuestionDto>> GetNextQuestion(int sessionId, int? skillId)
         {
             try
             {
-                var questionDto = await service.GetNextQuestion(userId,sessionId, skillId);
+                var userId = GetUserId();
+                var questionDto = await service.GetNextQuestion(userId, sessionId, skillId);
 
                 if (questionDto == null)
                     return NotFound();
@@ -78,10 +83,11 @@ namespace MyProject.Controllers
         }
 
         [HttpPost("submit-answer")]
-        public async Task<ActionResult<QuestionReviewDto>> SubmitAnswer(int userId, [FromBody] UserAnswerDto dto)
+        public async Task<ActionResult<QuestionReviewDto>> SubmitAnswer( [FromBody] UserAnswerDto dto)
         {
             try
             {
+                var userId = GetUserId();
                 var review = await service.SubmitAnswer(userId, dto);
                 return Ok(review);
             }
@@ -93,6 +99,10 @@ namespace MyProject.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         }
     }
 }

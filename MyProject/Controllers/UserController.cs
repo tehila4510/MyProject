@@ -63,8 +63,7 @@ namespace MyProject.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                if (currentUserId != id && !User.IsInRole("Admin"))
+                if (!IsOwnerOrAdmin(id))
                     return Forbid();
                 var user = await service.GetById(id);
                 return Ok(user);
@@ -85,8 +84,7 @@ namespace MyProject.Controllers
         public async Task<IActionResult> Put(int id, [FromForm] UserUpdateDto value)
         {
             try {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                if (currentUserId != id && !User.IsInRole("Admin"))
+                if (!IsOwnerOrAdmin(id))
                     return Forbid();
                 var updatedUser = await service.Update(id, value);
                 return Ok(updatedUser);
@@ -108,8 +106,7 @@ namespace MyProject.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                if (currentUserId != id && !User.IsInRole("Admin"))
+                if (!IsOwnerOrAdmin(id))
                     return Forbid();
                 await service.Delete(id);
                 return NoContent();
@@ -122,6 +119,11 @@ namespace MyProject.Controllers
             {
                 return StatusCode(500, "An error occurred while processing your request.");
             }
+        }
+        private bool IsOwnerOrAdmin(int id)
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            return currentUserId == id || User.IsInRole("Admin");
         }
     }
 }

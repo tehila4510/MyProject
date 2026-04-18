@@ -11,5 +11,7 @@ namespace Services.Interfaces
     public interface IAnswerService
     {
         Task<QuestionReviewDto> SubmitAnswer(int userId, UserAnswerDto dto);
+        Task<List<UserAnswerDto>> GetByUser(int userId);
+
     }
 }

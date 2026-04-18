@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Dto.Sessions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 

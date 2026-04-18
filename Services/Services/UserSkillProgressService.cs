@@ -38,7 +38,7 @@ namespace Services.Services
         {
             var userSkillProgress = await repository.GetById(userId,skillId);
             if (userSkillProgress == null)
-                throw new KeyNotFoundException($"UserSkillProgress with id {userSkillProgress.UserSkillProgressId} not found");
+                throw new KeyNotFoundException("UserSkillProgress not found");
             await repository.DeleteItem(userId, skillId);
         }
 
@@ -54,7 +54,7 @@ namespace Services.Services
         {
             var entity = await repository.GetById(userId, skillId);
             if (entity == null)
-                throw new KeyNotFoundException($"UserSkillProgress with id {entity.UserSkillProgressId} not found");
+                throw new KeyNotFoundException("UserSkillProgress not found");
 
             return new UserSkillProgressViewDto
             {
@@ -82,7 +82,7 @@ namespace Services.Services
         {
             var userSkillProgress = await repository.GetById(userId, skillId);
             if (userSkillProgress == null)
-                throw new KeyNotFoundException($"UserSkillProgress with id {userSkillProgress.UserSkillProgressId} not found");
+                throw new KeyNotFoundException("UserSkillProgress not found");
 
             var usp =await repository.UpdateItem( userId,  skillId, mapper.Map<UserSkillProgress>(item));
             return mapper.Map<UserSkillProgressDto>(usp);

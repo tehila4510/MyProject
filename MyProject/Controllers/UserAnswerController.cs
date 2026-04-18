@@ -1,7 +1,10 @@
 ﻿using Common;
 using Common.Dto.UserProgress;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
+using Services.Services;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -10,19 +13,22 @@ namespace MyProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserAnswerController : ControllerBase
     {
 
-        private IConfiguration _configuration;
         private readonly IService<UserAnswerDto> service;
-        public UserAnswerController(IConfiguration _configuration, IService<UserAnswerDto> service)
+        private readonly IAnswerService answerService;
+        public UserAnswerController(IService<UserAnswerDto> service, IAnswerService answerService)
         {
-            this._configuration = _configuration;
             this.service = service;
+            this.answerService = answerService;
         }
 
         // GET: api/<UserAnswerController>
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult>  Get()
         {
             try
@@ -34,12 +40,28 @@ namespace MyProject.Controllers
             {
                 return NotFound(ex.Message);
             }
-             catch (Exception)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
-
+        [HttpGet("my-answers")]
+        public async Task<IActionResult> GetMyAnswers()
+        {
+            try
+            {
+                var userId = GetUserId();
+                return Ok(await answerService.GetByUser(userId));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
         // GET api/<UserAnswerController>/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -107,10 +129,15 @@ namespace MyProject.Controllers
             {
                 return NotFound(ex.Message);
             }
-             catch (Exception)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while processing your request.");
             }
+        }
+
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         }
     }
 }

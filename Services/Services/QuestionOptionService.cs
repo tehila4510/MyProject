@@ -3,6 +3,7 @@ using Common;
 using Common.Dto.Question;
 using Repository.Entities;
 using Repository.Interfaces;
+using Repository.Repositories;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -45,7 +46,9 @@ namespace Services.Services
 
         public async Task<QuestionOptionDto> GetById(int id)
         {
-           var qo=await repository.GetById(id);
+            var qo=await repository.GetById(id);
+            if (qo == null)
+                throw new KeyNotFoundException($"Option with id {id} not found");
             return mapper.Map<QuestionOptionDto>(qo);
         }
 

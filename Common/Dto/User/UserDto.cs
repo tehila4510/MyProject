@@ -20,5 +20,6 @@ namespace Common.Dto.User
         public DateTime? LastActivity { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? ProUntil { get; set; }
+        public UserRole? Role { get; set; }
     }
 }
