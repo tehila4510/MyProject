@@ -1,84 +1,88 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Common.Dto.Chat;
+using Microsoft.Extensions.Configuration;
 using Services.Interfaces;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-
-namespace Services.Services
+using System.Linq;
+public class ChatService : IChatService
 {
-    public class Chat : IOpenAi
+    private readonly IConfiguration _configuration;
+    private readonly HttpClient _httpClient;
+
+    public ChatService(IConfiguration configuration, IHttpClientFactory factory)
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiKey;
+        _configuration = configuration;
+        _httpClient = factory.CreateClient();
+    }
 
-        public Chat(HttpClient httpClient, IConfiguration configuration)
-        {
-            _httpClient = httpClient;
-            _apiKey = configuration["OPENAI_API_KEY"];
-            Console.WriteLine($"API Key: {_apiKey}");
+    public async Task<object> AskTeacherAsync(UserRequest request)
+    {
+        var apiKey = _configuration["GeminiSettings:ApiKey"];
 
-        }
-        public async Task<string> chatGpt(string question)
-        {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", _apiKey);
-
-            // בניית הבקשה לפי Chat Completions API
-            var body = new
+        var allMessages = request.History
+            .Select(h => (object)new
             {
-                model = "gpt-3.5-turbo",
-                messages = new[]
-                {
-            new { role = "user", content = question }
-        }
-            };
-            var json = JsonSerializer.Serialize(body);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+                role = h.Role,
+                parts = new[] { new { text = h.Text } }
+            })
+            .ToList();
 
-            int retries = 3;
+        allMessages.Add(new
+        {
+            role = "user",
+            parts = new[] { new { text = request.Message } }
+        });
 
-            for (int i = 0; i < retries; i++)
+        var requestBody = new
+        {
+            system_instruction = new
             {
-                try
+                parts = new[]
                 {
-                    var response = await _httpClient.PostAsync(
-                        "https://api.openai.com/v1/chat/completions", content);
-
-                    // הדפס פרטי response
-                    Console.WriteLine($"Status Code: {(int)response.StatusCode} ({response.StatusCode})");
-                    foreach (var header in response.Headers)
-                    {
-                        Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
+                    new
+                    { 
+                        text = "You are a patient English teacher." +
+                        " Reply in English using simple language. " + 
+                        "If the user makes a mistake, bold the correction and explain in Hebrew. " + 
+                        "Always end with a follow-up question." 
                     }
 
-                    var bodyContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Body: {bodyContent}");
-
-                    // אם הצלחנו, מחזירים את התשובה
-                    response.EnsureSuccessStatusCode();
-
-                    using var doc = JsonDocument.Parse(bodyContent);
-                    var text = doc.RootElement
-                                  .GetProperty("choices")[0]
-                                  .GetProperty("message")
-                                  .GetProperty("content")
-                                  .GetString();
-
-                    return text;
                 }
-                catch (HttpRequestException ex) when ((int?)ex.StatusCode == 429)
-                {
-                    // המתנה לפני retry
-                    await Task.Delay(1000 * (i + 1));
-                }
-            }
+            },
+            contents = allMessages
+        };
 
-            throw new Exception("Request failed after multiple retries due to 429 Too Many Requests.");
-        }
+        var jsonPayload = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key={apiKey}";
+        
+        var response = await _httpClient.PostAsync(url, content);
+       response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
 
+        if (!response.IsSuccessStatusCode)
+            throw new Exception(responseString);
 
+        using var doc = JsonDocument.Parse(responseString);
+
+        var botReply = doc.RootElement
+            .GetProperty("candidates")[0]
+            .GetProperty("content")
+            .GetProperty("parts")[0]
+            .GetProperty("text")
+            .GetString();
+
+        var updatedHistory = request.History
+            .Append(new ChatMessage { Role = "user", Text = request.Message })
+            .Append(new ChatMessage { Role = "model", Text = botReply })
+            .ToList();
+
+        return new
+        {
+            reply = botReply,
+            updatedHistory = updatedHistory
+        };
     }
 }

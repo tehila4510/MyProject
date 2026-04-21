@@ -1,6 +1,7 @@
 using AutoMapper;
 using DataContext.model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
@@ -50,8 +51,7 @@ namespace MyProject
             builder.Services.AddHttpClient();
 
             builder.Services.AddSingleton<IContext>(new GlottieContext(connection));
-            builder.Services.AddSingleton<IOpenAi, Chat>();
-
+            builder.Services.AddSingleton<IChatService, ChatService>();
             builder.Services.AddAutoMapper(typeof(MapperProfile));
 
             //var provider = builder.Services.BuildServiceProvider();
@@ -60,6 +60,8 @@ namespace MyProject
 
             builder.Services.AddServices();
             builder.Services.AddMemoryCache();
+
+
             // Authentication - JWT
             builder.Services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -96,6 +98,15 @@ namespace MyProject
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles(); 
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "ProfileImages")),
+                RequestPath = "/ProfileImages"
+            });
 
             app.UseCors("AllowReact");
 

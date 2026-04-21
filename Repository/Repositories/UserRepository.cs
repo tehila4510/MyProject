@@ -65,6 +65,9 @@ namespace Repository.Repositories
                 
                 await ctx.Save();      
             }
+
+            ctx.Users.Update(item);
+            await ctx.Save();
             return u;
         }
 

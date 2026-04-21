@@ -71,16 +71,17 @@ namespace Services.Services
 
         public async Task<object> Register(UserUpdateDto registerDto)
         {
+
             if (await UserExists(registerDto.Email))
                 throw new InvalidOperationException($"User with email {registerDto.Email} already exists");
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerDto.PasswordHash);
-            registerDto.PasswordHash = hashedPassword;
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
+            registerDto.Password = hashedPassword;
 
             // Save avatar file
             if (registerDto.file != null)
             {
                 var fileName = await fileService.SaveFileAsync(registerDto.file);
-                registerDto.AvatarUrl = Encoding.UTF8.GetBytes(fileName);
+                registerDto.AvatarUrl = fileName;
             }
             var user = mapper.Map<User>(registerDto);
             var createdUser = await repository.AddItem(user);
@@ -92,24 +93,19 @@ namespace Services.Services
 
         public async Task<UserDto> Update(int id, UserUpdateDto updateDto)
         {
-            var existingUser = await repository.GetById(id);
-            if (existingUser == null) throw new KeyNotFoundException();
-            if (!string.IsNullOrEmpty(updateDto.Name))
-                existingUser.Name = updateDto.Name;
+            var user = await repository.GetById(id);
 
-            if (!string.IsNullOrEmpty(updateDto.PasswordHash))
-            {
-                updateDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateDto.PasswordHash);
-            }
+            if (!string.IsNullOrEmpty(updateDto.Name))
+                user.Name = updateDto.Name;
 
             if (updateDto.file != null)
             {
                 var fileName = await fileService.SaveFileAsync(updateDto.file);
-                updateDto.AvatarUrl = Encoding.UTF8.GetBytes(fileName);
+                user.AvatarUrl = fileName;
             }
 
-            var updatedUser = await repository.UpdateItem(id, mapper.Map<User>(updateDto));
-            return mapper.Map<UserDto>(updatedUser);
+            await repository.UpdateItem(id, user);
+            return mapper.Map<UserDto>(user);
         }
         public async Task Delete(int id)
         {

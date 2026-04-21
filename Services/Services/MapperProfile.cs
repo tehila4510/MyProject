@@ -19,33 +19,21 @@ namespace Services.Services
             questionImagePath = Path.Combine(Directory.GetCurrentDirectory(), "QuestionImages");
 
             //User
+            CreateMap<User, UserDto>();
 
-            // Entity -> DTO
-            CreateMap<User, UserDto>()
-                .ForMember(dest => dest.AvatarUrl,
-                           opt => opt.MapFrom(src => Encoding.UTF8.GetBytes(src.AvatarUrl)))
-                .ForMember(dest => dest.file, opt => opt.Ignore());
-            // DTO -> Entity
-            CreateMap<UserDto, User>()
-                .ForMember(dest => dest.AvatarUrl,
-                           opt => opt.MapFrom(src => src.AvatarUrl != null ? Encoding.UTF8.GetString(src.AvatarUrl) : null))
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(dest => dest.CurrentLevel, opt => opt.MapFrom(_ => 1))
-                .ForMember(dest => dest.Xp, opt => opt.MapFrom(_ => 0))
-                .ForMember(dest => dest.Streak, opt => opt.MapFrom(_ => 0))
-                .ForMember(dest => dest.Hearts, opt => opt.MapFrom(_ => 5))
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(_ => UserRole.Registered));
-
+            // מיפוי ליצירה ועדכון
             CreateMap<UserUpdateDto, User>()
-                .ForMember(dest => dest.AvatarUrl,
-                           opt => opt.MapFrom(src => src.AvatarUrl != null ? Encoding.UTF8.GetString(src.AvatarUrl) : null))
-                .ForMember(d => d.Role, o => o.Ignore())
+                // רק מה ששונה בשם צריך מיפוי ידני
+                .ForMember(d => d.PasswordHash, o => o.MapFrom(s => s.Password))
+
+                // כל אלו חייבים Ignore כדי שלא יתאפסו לך הנתונים בזמן עדכון (Update)
+                .ForMember(d => d.UserId, o => o.Ignore())
                 .ForMember(d => d.Xp, o => o.Ignore())
                 .ForMember(d => d.Streak, o => o.Ignore())
                 .ForMember(d => d.Hearts, o => o.Ignore())
-                .ForMember(d => d.LastActivity, o => o.Ignore())
                 .ForMember(d => d.CreatedAt, o => o.Ignore())
-                .ForMember(d => d.ProUntil, o => o.Ignore());
+                .ForMember(d => d.Role, o => o.Ignore());
+
 
             //UserAnswer
             CreateMap<UserAnswer, UserAnswerDto>();

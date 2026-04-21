@@ -1,35 +1,34 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Common.Dto.Chat;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Services.Interfaces;
-using System.Threading.Tasks;
 
-namespace MyProject.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class ChatController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
-    public class ChatController : ControllerBase
+    private readonly IChatService _chatService;
+
+    public ChatController(IChatService chatService)
     {
-        private readonly IOpenAi _openAi;
+        _chatService = chatService;
+    }
 
-        public ChatController(IOpenAi openAi)
+    [HttpPost("ask")]
+    public async Task<IActionResult> AskTeacher([FromBody] UserRequest request)
+    {
+        try
         {
-            _openAi = openAi;
-        }
+            if (request == null || string.IsNullOrEmpty(request.Message))
+                return BadRequest("Message cannot be empty");
 
-        [HttpGet]
-        public async Task<IActionResult> Ask(string question)
+            var result = await _chatService.AskTeacherAsync(request);
+
+            return Ok(result);
+        }
+        catch (Exception e)
         {
-            try
-            {
-                var response = await _openAi.chatGpt(question);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return BadRequest();
         }
-
     }
 }

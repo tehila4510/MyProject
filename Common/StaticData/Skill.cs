@@ -22,8 +22,8 @@ namespace Common.StaticData
             { 5, new SkillInfo { Name = "Reading", Description = "Reading comprehension", RecommendedLevelId = 2 } },
             { 6, new SkillInfo { Name = "Writing", Description = "Writing practice", RecommendedLevelId = 3 } },
             { 7, new SkillInfo { Name = "Pronunciation", Description = "Speaking and pronunciation", RecommendedLevelId = 1 } },
-            { 8, new SkillInfo { Name = "Phrases", Description = "Useful phrases for conversation", RecommendedLevelId = 1 } }
-           //להוסיף אפשרות תשע של שיחה עם בוט
+            { 8, new SkillInfo { Name = "Phrases", Description = "Useful phrases for conversation", RecommendedLevelId = 1 } },
+            { 9, new SkillInfo { Name = "Chat with Glottie ", Description = "for improve the langauge", RecommendedLevelId = 1 } }
         };
     }
 }

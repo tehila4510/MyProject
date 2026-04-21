@@ -27,7 +27,7 @@ namespace Services.Services
             services.AddScoped<IQuizService, QuizService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IFileService, FileService>();
-            services.AddScoped<IOpenAi, Chat>();
+            services.AddScoped<IChatService, ChatService>();
             services.AddScoped<ISessionService, SessionService>();
             return services;
         }
