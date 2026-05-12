@@ -4,6 +4,7 @@ using Repository.Entities;
 using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Repository.Repositories
@@ -27,7 +28,10 @@ namespace Repository.Repositories
         {
             return await ctx.UserSkillProgress.ToListAsync();
         }
-       
+        public IQueryable<UserSkillProgress> GetByCondition(Expression<Func<UserSkillProgress, bool>> expression)
+        {
+            return ctx.UserSkillProgress.Where(expression);
+        }
         public async Task<UserSkillProgress> GetById(int userId,int skillId)
         {
             return await ctx.UserSkillProgress.FirstOrDefaultAsync(x => x.UserId == userId && x.SkillId==skillId);

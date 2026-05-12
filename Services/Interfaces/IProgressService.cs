@@ -12,9 +12,12 @@ namespace Services.Interfaces
     {
         Task<List<UserSkillProgressDto>> GetAll();
         Task<UserSkillProgressViewDto> GetById(int userId, int skillId);
+        Task<List<UserSkillProgressViewDto>> GetByUser(int userId);
+
         Task<UserSkillProgressDto> Add(UserSkillProgressDto item);
         Task<UserSkillProgressDto> Update(int userId, int skillId, UserSkillProgressDto item);
         Task Delete(int userId, int skillId);
         Task UpdateSkillProgress(int userId, int skillId, int isCorrect);
+
     }
 }

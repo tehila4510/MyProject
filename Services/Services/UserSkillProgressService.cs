@@ -2,6 +2,7 @@
 using Common;
 using Common.Dto.UserProgress;
 using Common.StaticData;
+using Microsoft.EntityFrameworkCore;
 using Repository.Entities;
 using Repository.Interfaces;
 using Repository.Repositories;
@@ -48,6 +49,26 @@ namespace Services.Services
             if (userSkillProgresses == null || userSkillProgresses.Count == 0)
                 throw new NotFoundException("No user skill progress found");
             return mapper.Map<List<UserSkillProgressDto>>(userSkillProgresses);
+        }
+
+        public async Task<List<UserSkillProgressViewDto>> GetByUser(int userId)
+        {
+            var progress = await repository
+                .GetByCondition(s => s.UserId == userId)
+                .ToListAsync();
+            if (progress == null || progress.Count == 0)
+                throw new NotFoundException("No progress found for the specified user");
+          //  return mapper.Map<List<UserSkillProgressViewDto>>(progress);
+
+            return progress.Select(entity => new UserSkillProgressViewDto
+            {
+                SkillId = entity.SkillId,
+                SkillName = GetSkillName(entity.SkillId),
+                ProgressPercent = CalculateProgress(entity.Mastery),
+                Accuracy = 2,
+                WeeklyXp = new List<int> { 500, 40, 30, 200 },
+                LastPracticed = entity.LastPracticed
+            }).ToList();
         }
 
         public async Task<UserSkillProgressViewDto> GetById(int userId,int skillId)
@@ -166,5 +187,7 @@ namespace Services.Services
 
             return (int)Math.Round((double)correctAnswers / totalQuestions * 100);
         }
+
+        
     }
 }

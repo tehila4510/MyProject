@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,5 +15,7 @@ namespace Repository.Interfaces
         Task<UserSkillProgress> AddItem(UserSkillProgress item);
         Task<UserSkillProgress> UpdateItem(int userId, int skillId, UserSkillProgress item);
         Task DeleteItem(int userId, int skillId);
+        IQueryable<UserSkillProgress> GetByCondition(Expression<Func<UserSkillProgress, bool>> expression);
+
     }
 }

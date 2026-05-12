@@ -41,6 +41,23 @@ namespace MyProject.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
+        [HttpGet("my-skill-progress")]
+        public async Task<IActionResult> GetMySkillProgress()
+        {
+            try
+            {
+                var userId = GetUserId();
+                return Ok(await service.GetByUser(userId));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
 
         // GET api/<UserSkillProgressController>/5
         [Authorize]
