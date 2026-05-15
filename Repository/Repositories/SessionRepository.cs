@@ -1,10 +1,11 @@
-﻿using Repository.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Repository.Entities;
 using Repository.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Repository.Repositories
@@ -40,7 +41,7 @@ namespace Repository.Repositories
 
         public IQueryable<Session> GetByCondition(Expression<Func<Session, bool>> expression)
         {
-            throw new NotImplementedException();
+            return ctx.Sessions.Where(expression);
         }
 
         public async Task<Session> GetById(int id)

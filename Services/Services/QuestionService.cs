@@ -82,11 +82,10 @@ namespace Services.Services
 
         private async Task<List<UserAnswer>> GetUserAnswersFromCache(int userId)
         {
-            _cache.Remove($"UserAnswers_{userId}");
+           // _cache.Remove($"UserAnswers_{userId}");
             string cacheKey = $"UserAnswers_{userId}";
             if (!_cache.TryGetValue(cacheKey, out List<UserAnswer> userAnswers))
             {
-                // ✅ מסנן ישירות בDB - לא מושך הכל!
                 userAnswers = await answerRepository
                     .GetByCondition(a => a.UserId == userId)
                     .ToListAsync();

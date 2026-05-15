@@ -3,6 +3,8 @@ using Common.Dto.Question;
 using Common.Dto.Questions;
 using Common.Dto.Sessions;
 using Common.Dto.UserProgress;
+using Common.StaticData;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Repository.Entities;
 using Repository.Interfaces;
@@ -16,6 +18,8 @@ namespace Services.Services
         private readonly IRepository<User> userRepository;
 
         private readonly IRepository<Question> questionRepository;
+        private readonly IRepository<UserAnswer> answerRepository;
+
         private readonly IQuestionService questionService;
         private readonly IAnswerService answerService;
         private readonly IProgressService progressService;
@@ -25,7 +29,8 @@ namespace Services.Services
             IQuestionService questionService,
             IAnswerService answerService,
             IProgressService progressService,
-            IRepository<User> userRepository
+            IRepository<User> userRepository,
+                IRepository<UserAnswer> answerRepository
            )
         {
             this.sessionRepository = sessionRepository;
@@ -34,9 +39,30 @@ namespace Services.Services
             this.progressService = progressService;
             this.questionRepository = questionRepository;
             this.userRepository = userRepository;
+            this.answerRepository = answerRepository;
         }
         public async Task<int> StartSession(int userId)
         {
+            var openSessions = await sessionRepository
+            .GetByCondition(s => s.UserId == userId && s.EndedAt == null)
+            .ToListAsync();
+
+            foreach (var open in openSessions)
+            {
+                open.EndedAt = open.StartedAt ?? DateTime.UtcNow; 
+                open.Score = 0;
+                open.TotalQuestions = 0;
+                open.CorrectAnswers = 0;
+                open.Xp = 0;
+                await sessionRepository.UpdateItem(open.SessionId, open);
+
+                var unanswered = open.UserAnswers
+                    .Where(a => string.IsNullOrEmpty(a.UserAnswerText))
+                    .Select(a => a.AnswerId)
+                    .ToList();
+                foreach (var id in unanswered)
+                    await answerRepository.DeleteItem(id);
+            }
             var session = new Session
             {
                 UserId = userId,
@@ -51,35 +77,37 @@ namespace Services.Services
         {
             var s = await sessionRepository.GetById(sessionId);
             if (s == null)
+             
                 throw new KeyNotFoundException($"Session with id {sessionId} not found");
-            s.EndedAt = DateTime.UtcNow;
-            
-            double score = CalculateSessionScore(s.UserAnswers.ToList());
-            s.Score = (int)Math.Round(score);
-            var xp= CalculateXpGained(s.UserAnswers.ToList(), score);
-            s.Xp = xp;
-            s.TotalQuestions = total;
-            s.CorrectAnswers = s.UserAnswers.Count(a => a.IsCorrect);
+            if (s.EndedAt.HasValue)
+                return MapToSessionDto(s);
 
-            // לרשום פה פונקציה של מחיקה של כל התשובות לשאלות הכפולות ולמחוק את כל התשובות הנכונות
+            s.EndedAt = DateTime.UtcNow;
+            var completedAnswers = s.UserAnswers
+           .Where(a => !string.IsNullOrEmpty(a.UserAnswerText))
+           .ToList();
+
+            var (score, totalQuestions, correctCount) = CalculateSessionScore(completedAnswers);
+            int xp = CalculateXpGained(completedAnswers, score);
+
+            s.Score = (int)Math.Round(score);
+            s.TotalQuestions = totalQuestions;
+            s.CorrectAnswers = correctCount;
+            s.Xp = xp;
+
             await sessionRepository.UpdateItem(sessionId, s);
+            await CleanupSessionAnswers(s);
+
 
             //עדכון היוזר
             var user = await userRepository.GetById(s.UserId);
             user.Xp += xp;
-            user.CurrentLevel = user.Xp / 300; // לדוגמה, כל 100 XP = רמה חדשה
-            user.Streak = user.LastActivity.HasValue && user.LastActivity.Value.Date == DateTime.UtcNow.Date.AddDays(-1) ? user.Streak + 1 : 1; 
+            user.CurrentLevel = CalculateLevel(user.Xp);
+            user.Streak = CalculateStreak(user.LastActivity, user.Streak);
             user.LastActivity = DateTime.UtcNow;
             await userRepository.UpdateItem(user.UserId, user);
 
-            return new SessionDto
-            {
-                SessionId = s.SessionId,
-                UserId = s.UserId,
-                DurationInMinutes = s.StartedAt.HasValue && s.EndedAt.HasValue ? (s.EndedAt.Value - s.StartedAt.Value).TotalMinutes : null,
-                Score = s.Score,
-                Xp= xp,
-            };
+            return MapToSessionDto(s, xp);
         }
 
         public async Task<QuestionDto> GetNextQuestion(int userId,int sessionId,int? skillId)
@@ -96,44 +124,81 @@ namespace Services.Services
 
 
         //--------------פעולות עזר----------------
-        int total = 0;
-        private double CalculateSessionScore(List<UserAnswer> answers)
-        {
-            total = answers.Count;
-            if (!answers.Any()) return 0;
 
+
+        private async Task CleanupSessionAnswers(Session session)
+        {
+            var answersByQuestion = session.UserAnswers
+                .Where(a => !string.IsNullOrEmpty(a.UserAnswerText))
+                .GroupBy(a => a.QuestionId)
+                .ToList();
+
+            var idsToDelete = new List<int>();
+
+            foreach (var group in answersByQuestion)
+            {
+                var ordered = group.OrderBy(a => a.AnsweredAt).ToList();
+                var lastAnswer = ordered.Last();
+
+                if (lastAnswer.IsCorrect)
+                {
+                    idsToDelete.AddRange(ordered.Select(a => a.AnswerId));
+                }
+                else
+                {
+                    idsToDelete.AddRange(ordered.Take(ordered.Count - 1).Select(a => a.AnswerId));
+                }
+            }
+
+            var unansweredIds = session.UserAnswers
+                .Where(a => string.IsNullOrEmpty(a.UserAnswerText))
+                .Select(a => a.AnswerId);
+
+            idsToDelete.AddRange(unansweredIds);
+
+            foreach (var id in idsToDelete)
+                await answerRepository.DeleteItem(id);
+        }
+        private (double score, int totalQuestions, int correctCount) CalculateSessionScore(List<UserAnswer> answers)
+        {
+            if (!answers.Any()) return (0, 0, 0);
+
+            var questionGroups = answers
+           .GroupBy(a => a.QuestionId)
+           .ToList();
+
+            int totalQuestions = questionGroups.Count;
+            int correctCount = 0;
             double totalWeighted = 0;
             double maxPossible = 0;
-
-            foreach (var answer in answers)
+            foreach (var group in questionGroups)
             {
-                var question = answer.Question;
+                var orderedAttempts = group.OrderBy(a => a.AnsweredAt).ToList();
+                var finalAnswer = orderedAttempts.Last(); 
+                var question = finalAnswer.Question;
+
                 double levelMultiplier = question?.LevelId ?? 1;
+                maxPossible += levelMultiplier; 
 
-                maxPossible += levelMultiplier * 1.0;
+                if (!finalAnswer.IsCorrect) continue;
 
-                if (!answer.IsCorrect)
-                    continue;
-                
-                double timeWeight = GetTimeWeight(answer.TimeToAnswerMs);
+                correctCount++;
 
-                int attempts = answers.Count(a => a.QuestionId == answer.QuestionId);
-                total-=attempts-1;
+                double timeWeight = GetTimeWeight(finalAnswer.TimeToAnswerMs);
+
+                int attempts = orderedAttempts.Count;
                 double attemptWeight = GetAttemptWeight(attempts);
 
                 totalWeighted += levelMultiplier * timeWeight * attemptWeight;
             }
 
-            if (maxPossible == 0) return 0;
-
-            return (totalWeighted / maxPossible) * 100;
+            double score = maxPossible == 0 ? 0 : (totalWeighted / maxPossible) * 100;
+            return (score, totalQuestions, correctCount);
         }
-        // XP מחושב בנפרד - לפי ביצועים
         public int CalculateXpGained(List<UserAnswer> answers, double score)
         {
-            int baseXp = 10; // XP בסיסי לסיום שיעור
+            int baseXp = 10; 
 
-            // בונוס לפי ציון
             int scoreBonus = score switch
             {
                 >= 90 => 20,
@@ -142,10 +207,18 @@ namespace Services.Services
                 _ => 0
             };
 
-            // בונוס אם ענה על שאלות קשות
             int hardQuestionBonus = answers
-                .Where(a => a.IsCorrect && (a.Question?.LevelId ?? 0) >= 4)
-                .Count() * 3;
+                .GroupBy(a => a.QuestionId)
+                .Where(g =>
+                {
+                    var ordered = g.OrderBy(a => a.AnsweredAt).ToList();
+                    return ordered.Last().IsCorrect              // נכון בסוף
+                        && ordered.Count == 1                    // בניסיון ראשון
+                        && (ordered.Last().Question?.LevelId ?? 0) >= 4;
+                })
+                .Count() * 5; 
+
+            int streakBonus = 0; // ניתן להוסיף לוגיקה כאן
 
             return baseXp + scoreBonus + hardQuestionBonus;
         }
@@ -167,6 +240,33 @@ namespace Services.Services
 
             return 0.4;
         }
+        private int CalculateLevel(int xp)
+        {
+            return Level.AllLevels
+                .OrderByDescending(l => l.Key)
+                .FirstOrDefault(l => xp >= l.Value.MinXp)
+                .Key;
+        }
+        private int CalculateStreak(DateTime? lastActivity, int currentStreak)
+        {
+            if (!lastActivity.HasValue) return 1;
 
+            var today = DateTime.UtcNow.Date;
+            var lastDate = lastActivity.Value.Date;
+
+            if (lastDate == today) return currentStreak;                 
+            if (lastDate == today.AddDays(-1)) return currentStreak + 1; 
+            return 1;                                                    
+        }
+        private SessionDto MapToSessionDto(Session s, int? xp = null) => new SessionDto
+        {
+            SessionId = s.SessionId,
+            UserId = s.UserId,
+            DurationInMinutes = s.StartedAt.HasValue && s.EndedAt.HasValue
+           ? (s.EndedAt.Value - s.StartedAt.Value).TotalMinutes
+           : null,
+            Score = s.Score,
+            Xp = xp ?? s.Xp,
+        };
     }
 }

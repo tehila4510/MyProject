@@ -83,7 +83,7 @@ namespace Services.Services
                 SkillName = GetSkillName(entity.SkillId),
 
                 ProgressPercent = CalculateProgress(entity.Mastery),
-                // Accuracy = CalculateAccuracy(entity.CorrectAnswers, entity.TotalQuestions),
+                //Accuracy = CalculateAccuracy(entity.CorrectAnswers, entity.TotalQuestions),
 
                 //WeeklyXp = GetWeeklyXp(userId, skillId),
 
@@ -114,12 +114,13 @@ namespace Services.Services
         public async Task UpdateUserLevelAfterSession(int userId, double sessionScore)
         {
             var user = await userRepository.GetById(userId);
-            if (user == null) return;
+            if (user == null) throw new KeyNotFoundException("User not found");
 
-            // ממוצע XP צבור → רמה כללית
-            // לדוגמה: כל 500 XP = רמה
-            int newLevel = (user.Xp / 500) + 1;
-            newLevel = Math.Clamp(newLevel, 1, 10);
+
+            int newLevel = Level.AllLevels
+               .OrderByDescending(l => l.Key)
+               .FirstOrDefault(l => user.Xp >= l.Value.MinXp)
+               .Key;
 
             if (newLevel != user.CurrentLevel)
             {
