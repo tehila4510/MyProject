@@ -133,7 +133,7 @@ namespace Services.Services
               "Perfect! You nailed it! 💪",
               "Brilliant! Well done! ⭐"
           };
-            return messages[new Random().Next(messages.Length)];
+            return messages[Random.Shared.Next(messages.Length)];
         }
 
         private string BuildCorrectAnswerText(Question question)

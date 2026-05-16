@@ -140,10 +140,8 @@ namespace Services.Services
         }
 
 
-        // --- חישוב רצף נכונות בסשן הנוכחי ---
-        private int GetCurrentCorrectStreak(List<UserAnswer> sessionAnswers)
+\        private int GetCurrentCorrectStreak(List<UserAnswer> sessionAnswers)
         {
-            // סופרים כמה תשובות אחרונות ברצף היו נכונות
             int streak = 0;
             foreach (var answer in sessionAnswers.OrderByDescending(a => a.AnsweredAt))
             {
@@ -155,14 +153,11 @@ namespace Services.Services
             return streak;
         }
 
-        // --- חישוב רמת יעד לפי רצף ---
         private int CalculateTargetLevel(int userLevel, int correctStreak)
         {
-            // כל 5 נכונות ברצף - עולים רמה אחת בקושי
             int levelBoost = correctStreak / 5;
             int targetLevel = userLevel + levelBoost;
 
-            // לא נחרוג מהרמה המקסימלית (נניח max=5)
             return Math.Min(targetLevel, 5);
         }
 
@@ -178,12 +173,10 @@ namespace Services.Services
             else
                 weight = 0.5;
 
-            //קיבלתי רק את הלבל ID 
             weight *= question.LevelId;
             return weight;
         }
 
-        // --- בחירת השאלה הטובה ביותר ---
         private Question SelectBestQuestion(
             List<Question> available,
             List<UserAnswer> userHistory,
@@ -198,13 +191,10 @@ namespace Services.Services
                 .OrderByDescending(x => x.Weight)
                 .ToList();
 
-            // לא בוחרים תמיד את הראשון - קצת אקראיות בין Top 3
-            // כדי שהחוויה לא תהיה צפויה מדי
             var topCandidates = weighted.Take(3).ToList();
-            var randomIndex = new Random().Next(topCandidates.Count);
+            var randomIndex = Random.Shared.Next(topCandidates.Count);
             return topCandidates[randomIndex].Question;
         }
-        // --- חישוב משקל לשאלה ---
         private double CalculateQuestionWeight(
             Question question,
             List<UserAnswer> history,
@@ -212,29 +202,26 @@ namespace Services.Services
         {
             double weight = 1.0;
 
-            // א. קירבה לרמת היעד - ככל שקרובה יותר, משקל גבוה יותר
             int levelDiff = Math.Abs(question.LevelId - targetLevel);
             weight += levelDiff switch
             {
-                0 => 3.0,  // בדיוק הרמה הנכונה
-                1 => 1.5,  // קרוב
-                2 => 0.5,  // רחוק
-                _ => 0.0   // רחוק מאוד
+                0 => 3.0,  
+                1 => 1.5,  
+                2 => 0.5,  
+                _ => 0.0   
             };
 
-            // ב. היסטוריה - שאלות שנכשל בהן → עדיפות גבוהה יותר (חזרה)
             var pastAnswer = history
                 .Where(a => a.QuestionId == question.QuestionId)
                 .OrderByDescending(a => a.AnsweredAt)
                 .FirstOrDefault();
 
             if (pastAnswer == null)
-                weight += 1.0; // שאלה חדשה - טובה ללמידה
+                weight += 1.0; 
             else if (!pastAnswer.IsCorrect)
-                weight += 2.0; // נכשל → חשוב לחזור
+                weight += 2.0; 
             else
-                weight -= 0.5; // כבר ידע - פחות דחוף
-
+                weight -= 0.5; 
             return weight;
         }
 

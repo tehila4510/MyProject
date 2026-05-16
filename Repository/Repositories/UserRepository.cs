@@ -62,12 +62,10 @@ namespace Repository.Repositories
                 u.Hearts = item.Hearts;
                 u.LastActivity = item.LastActivity;
                 u.ProUntil = item.ProUntil;
-                
                 await ctx.Save();      
             }
 
-            ctx.Users.Update(item);
-            await ctx.Save();
+          
             return u;
         }
 

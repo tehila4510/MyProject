@@ -19,7 +19,7 @@ namespace Repository.Repositories
         }
         public async Task<UserAnswer> AddItem(UserAnswer item)
         {
-            ctx.UserAnswers.AddAsync(item);
+            await ctx.UserAnswers.AddAsync(item);
             await ctx.Save();
             return item;
         }

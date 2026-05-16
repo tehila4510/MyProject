@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,7 +30,7 @@ namespace Services.Services
                 new Claim(ClaimTypes.NameIdentifier, u.UserId.ToString()),
                 new Claim(ClaimTypes.Email, u.Email),
                 new Claim(ClaimTypes.Name, u.Name),
-                //new Claim(ClaimTypes.Role, u.Role)
+          //      new Claim(ClaimTypes.Role, u.Role?.ToString() ?? string.Empty)
             };
             var token = new JwtSecurityToken(
                 issuer: configuration["Jwt:Issuer"],
@@ -39,8 +40,9 @@ namespace Services.Services
                 signingCredentials: credentials
             );
 
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
+       
     }
 }

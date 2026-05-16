@@ -1,6 +1,7 @@
 using AutoMapper;
 using DataContext.model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -50,7 +51,7 @@ namespace MyProject
 
             builder.Services.AddHttpClient();
 
-            builder.Services.AddSingleton<IContext>(new GlottieContext(connection));
+            builder.Services.AddScoped<IContext>(provider => new GlottieContext(connection));
             builder.Services.AddSingleton<IChatService, ChatService>();
             builder.Services.AddAutoMapper(typeof(MapperProfile));
 

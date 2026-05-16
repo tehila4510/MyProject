@@ -41,12 +41,19 @@ namespace Repository.Repositories
 
         public IQueryable<Session> GetByCondition(Expression<Func<Session, bool>> expression)
         {
-            return ctx.Sessions.Where(expression);
+            return ctx.Sessions
+        .Include(s => s.UserAnswers)
+            .ThenInclude(ua => ua.Question)
+        .Where(expression);
         }
 
         public async Task<Session> GetById(int id)
         {
-           return await ctx.Sessions.FirstOrDefaultAsync(x => x.SessionId == id);
+            return await ctx.Sessions
+                  .Include(s => s.UserAnswers)
+                      .ThenInclude(ua => ua.Question)
+                          .ThenInclude(q => q.Options)
+                  .FirstOrDefaultAsync(x => x.SessionId == id);
         }
 
         public async Task<Session> UpdateItem(int id, Session item)

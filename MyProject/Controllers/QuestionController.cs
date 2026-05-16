@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Entities;
 using Services.Interfaces;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -68,7 +69,7 @@ namespace MyProject.Controllers
         }
         private int GetUserId()
         {
-            return int.Parse(User.FindFirst("userId")?.Value);
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         }
         // POST api/<QuestionController>
         [HttpPost]
