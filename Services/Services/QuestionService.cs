@@ -139,8 +139,7 @@ namespace Services.Services
             return dto;
         }
 
-
-\        private int GetCurrentCorrectStreak(List<UserAnswer> sessionAnswers)
+        private int GetCurrentCorrectStreak(List<UserAnswer> sessionAnswers)
         {
             int streak = 0;
             foreach (var answer in sessionAnswers.OrderByDescending(a => a.AnsweredAt))

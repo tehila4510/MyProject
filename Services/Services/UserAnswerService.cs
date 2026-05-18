@@ -4,6 +4,7 @@ using Common.Dto.Questions;
 using Common.Dto.Sessions;
 using Common.Dto.UserProgress;
 using Common.Enums;
+using Common.StaticData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Repository.Entities;
@@ -50,10 +51,26 @@ namespace Services.Services
         }
         public async Task<List<UserAnswerDto>> GetByUser(int userId)
         { 
-            var answers = await repository.GetByCondition(s => s.UserId == userId).ToListAsync();
+            var answers = await repository.GetByCondition(s => s.UserId == userId)
+                 .Include(a => a.Question)
+            .ThenInclude(q => q.Options)
+        .ToListAsync();
+
             if (answers == null || answers.Count == 0)
                 throw new NotFoundException("No answers found for the specified user");
-            return mapper.Map<List<UserAnswerDto>>(answers);
+            return answers.Select(a => new UserAnswerDto
+            {
+                AnswerId = a.AnswerId,
+                UserId = a.UserId,
+                QuestionId = a.QuestionId,
+                SessionId = a.SessionId,
+                UserAnswerText = a.UserAnswerText,
+                IsCorrect = a.IsCorrect,
+                AnsweredAt = a.AnsweredAt,
+                QuestionText = a.Question?.QuestionText,
+                SkillName = Skill.AllSkills.TryGetValue(a.Question?.SkillId ?? 0, out var s) ? s.Name : "Unknown",
+                CorrectAnswerText = a.Question?.Options?.FirstOrDefault(o => o.IsCorrect)?.OptionText
+            }).ToList();
         }
         public async Task<UserAnswerDto> GetById(int id)
         {

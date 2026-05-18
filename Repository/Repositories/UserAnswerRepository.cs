@@ -41,7 +41,9 @@ namespace Repository.Repositories
 
         public IQueryable<UserAnswer> GetByCondition(Expression<Func<UserAnswer, bool>> expression)
         {
-            return ctx.UserAnswers.Where(expression);
+            return ctx.UserAnswers.Where(expression).Include(a => a.Question)
+            .ThenInclude(q => q.Options)
+        .Where(expression);
         }
 
         public async Task<UserAnswer> GetById(int id)

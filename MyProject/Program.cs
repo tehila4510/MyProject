@@ -82,12 +82,20 @@ namespace MyProject
                     };
                 });
 
+            
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowReact", p =>
-                    p.AllowAnyOrigin()
-                     .AllowAnyHeader()
-                     .AllowAnyMethod());
+                options.AddPolicy("AllowReact", policy =>
+                {
+                    policy
+                        .WithOrigins(
+                            "http://localhost:5173",
+                            "https://localhost:5173"
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
             });
 
             var app = builder.Build();

@@ -25,5 +25,10 @@ namespace Common.Dto.UserProgress
 
         public bool? IsCorrect { get; set; }
         public int? SelectedOptionId { get; set; }
+
+        public string? QuestionText { get; set; }
+        public string? CorrectAnswerText { get; set; }
+        public string? SkillName { get; set; }
+        public DateTime? AnsweredAt { get; set; }
     }
 }

@@ -227,11 +227,11 @@ namespace Services.Services
         {
             double seconds = time.TotalSeconds;
 
-            if (seconds <= 2) return 1;
-            if (seconds <= 5) return 0.8;
-            if (seconds <= 10) return 0.6;
+            if (seconds <= 5) return 1.0;   
+            if (seconds <= 15) return 0.9;  
+            if (seconds <= 30) return 0.8;  
 
-            return 0.4;
+            return 0.7;                     
         }
         private double GetAttemptWeight(int attempts)
         {
