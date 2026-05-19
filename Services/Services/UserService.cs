@@ -94,16 +94,15 @@ namespace Services.Services
         public async Task<UserDto> Update(int id, UserUpdateDto updateDto)
         {
             var user = await repository.GetById(id);
-
-            if (!string.IsNullOrEmpty(updateDto.Name))
-                user.Name = updateDto.Name;
+            if (user == null)
+                throw new KeyNotFoundException($"User with id {id} not found");
 
             if (updateDto.file != null)
             {
                 var fileName = await fileService.SaveFileAsync(updateDto.file);
                 user.AvatarUrl = fileName;
             }
-
+            mapper.Map(updateDto, user);
             await repository.UpdateItem(id, user);
             return mapper.Map<UserDto>(user);
         }

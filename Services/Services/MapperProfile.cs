@@ -23,16 +23,15 @@ namespace Services.Services
 
             // מיפוי ליצירה ועדכון
             CreateMap<UserUpdateDto, User>()
-                // רק מה ששונה בשם צריך מיפוי ידני
+                .ForMember(d => d.PasswordHash, o => o.Condition(s => !string.IsNullOrEmpty(s.Password)))
                 .ForMember(d => d.PasswordHash, o => o.MapFrom(s => s.Password))
-
-                // כל אלו חייבים Ignore כדי שלא יתאפסו לך הנתונים בזמן עדכון (Update)
                 .ForMember(d => d.UserId, o => o.Ignore())
                 .ForMember(d => d.Xp, o => o.Ignore())
                 .ForMember(d => d.Streak, o => o.Ignore())
                 .ForMember(d => d.Hearts, o => o.Ignore())
                 .ForMember(d => d.CreatedAt, o => o.Ignore())
-                .ForMember(d => d.Role, o => o.Ignore());
+                .ForMember(d => d.Role, o => o.Ignore())
+                .ForMember(d => d.AvatarUrl, o => o.Ignore());
 
 
             //UserAnswer
