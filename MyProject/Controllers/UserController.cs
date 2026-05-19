@@ -120,6 +120,29 @@ namespace MyProject.Controllers
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
+        [Authorize]
+        [HttpPost("lose-heart")]
+        public async Task<IActionResult> LoseHeart()
+        {
+            try
+            {
+                var userId = GetUserId();
+                var hasHearts = await service.LoseHeart(userId);
+                return Ok(new { hasHearts });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        }
         private bool IsOwnerOrAdmin(int id)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");

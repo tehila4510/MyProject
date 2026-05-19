@@ -114,5 +114,25 @@ namespace Services.Services
                 throw new KeyNotFoundException($"User with id {id} not found");
             await repository.DeleteItem(id);
         }
+
+        public async Task<bool> LoseHeart(int userId)
+        {
+            var user = await repository.GetById(userId);
+            if (user == null) throw new KeyNotFoundException();
+
+            if (user.Hearts <= 0) return false; 
+
+            user.Hearts--;
+            await repository.UpdateItem(userId, user);
+            return user.Hearts > 0; 
+        }
+
+        public Task ResetHearts(int userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
+
+
+

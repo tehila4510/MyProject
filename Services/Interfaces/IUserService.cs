@@ -14,5 +14,7 @@ namespace Services.Interfaces
         Task<UserDto> Update(int id, UserUpdateDto updateDto);
         Task Delete(int id);
         Task<bool> UserExists(string email);
+        Task<bool> LoseHeart(int userId);
+        Task ResetHearts(int userId);
     }
 }
