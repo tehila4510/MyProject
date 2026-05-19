@@ -23,6 +23,10 @@ namespace Services.Services
         private readonly IQuestionService questionService;
         private readonly IAnswerService answerService;
         private readonly IProgressService progressService;
+
+        private readonly IEssentials<Session> sessionEss;
+        private readonly IEssentials<UserAnswer> answerEss;
+
         public QuizService(
             IRepository<Question> questionRepository,
             IRepository<Session> sessionRepository,
@@ -30,7 +34,9 @@ namespace Services.Services
             IAnswerService answerService,
             IProgressService progressService,
             IRepository<User> userRepository,
-                IRepository<UserAnswer> answerRepository
+                IRepository<UserAnswer> answerRepository,
+                IEssentials<Session> sessionEss,
+                IEssentials<UserAnswer> answerEss
            )
         {
             this.sessionRepository = sessionRepository;
@@ -40,29 +46,33 @@ namespace Services.Services
             this.questionRepository = questionRepository;
             this.userRepository = userRepository;
             this.answerRepository = answerRepository;
+            this.answerEss = answerEss;
+            this.sessionEss = sessionEss;
         }
         public async Task<int> StartSession(int userId)
+        
         {
             var openSessions = await sessionRepository
             .GetByCondition(s => s.UserId == userId && s.EndedAt == null)
             .ToListAsync();
 
-            foreach (var open in openSessions)
+            if (openSessions.Any())
             {
-                open.EndedAt = open.StartedAt ?? DateTime.UtcNow; 
-                open.Score = 0;
-                open.TotalQuestions = 0;
-                open.CorrectAnswers = 0;
-                open.Xp = 0;
-                await sessionRepository.UpdateItem(open.SessionId, open);
+                var sessionIds = openSessions.Select(s => s.SessionId).ToList();
 
-                var unanswered = open.UserAnswers
-                    .Where(a => string.IsNullOrEmpty(a.UserAnswerText))
-                    .Select(a => a.AnswerId)
-                    .ToList();
-                foreach (var id in unanswered)
-                    await answerRepository.DeleteItem(id);
+                var unansweredAnswers = await answerRepository
+                      .GetByCondition(a => sessionIds.Contains(a.SessionId))
+                      .Select(a => a.AnswerId)
+                      .ToListAsync();
+
+                if (unansweredAnswers.Any())
+                {
+                    await answerEss.DeleteRange(unansweredAnswers);
+                }
+
+                await sessionEss.DeleteRange(sessionIds);
             }
+
             var session = new Session
             {
                 UserId = userId,
@@ -129,9 +139,9 @@ namespace Services.Services
         private async Task CleanupSessionAnswers(Session session)
         {
             var answersByQuestion = session.UserAnswers
-                .Where(a => !string.IsNullOrEmpty(a.UserAnswerText))
-                .GroupBy(a => a.QuestionId)
-                .ToList();
+         .Where(a => !string.IsNullOrEmpty(a.UserAnswerText))
+         .GroupBy(a => a.QuestionId)
+         .ToList();
 
             var idsToDelete = new List<int>();
 
@@ -146,6 +156,9 @@ namespace Services.Services
                 }
                 else
                 {
+                    var previousAttemptsIds = ordered
+                .Take(ordered.Count - 1)
+                .Select(a => a.AnswerId);
                     idsToDelete.AddRange(ordered.Take(ordered.Count - 1).Select(a => a.AnswerId));
                 }
             }
@@ -156,8 +169,10 @@ namespace Services.Services
 
             idsToDelete.AddRange(unansweredIds);
 
-            foreach (var id in idsToDelete)
-                await answerRepository.DeleteItem(id);
+            if (idsToDelete.Any())
+            {
+                await answerEss.DeleteRange(idsToDelete);
+            }
         }
         private (double score, int totalQuestions, int correctCount) CalculateSessionScore(List<UserAnswer> answers)
         {

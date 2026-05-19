@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace Repository.Repositories
 {
-    public class UserAnswerRepository : IRepository<UserAnswer>
+    public class UserAnswerRepository : IRepository<UserAnswer>,IEssentials<UserAnswer>
     {
         private readonly IContext ctx;
         public UserAnswerRepository(IContext context)
@@ -33,6 +33,8 @@ namespace Repository.Repositories
                 await ctx.Save();
             }
         }
+
+        
 
         public async Task<List<UserAnswer>> GetAll()
         {
@@ -67,5 +69,18 @@ namespace Repository.Repositories
             }
             return ua;
         }
+        public async Task UpdateRange(IEnumerable<UserAnswer> items)
+        {
+            if (items == null || !items.Any()) return;
+            ctx.UserAnswers.UpdateRange(items);
+            await ctx.Save();
+        }
+        public async Task DeleteRange(IEnumerable<int> ids)
+        {
+            await ctx.UserAnswers
+         .Where(item => ids.Contains(item.AnswerId))
+         .ExecuteDeleteAsync();
+        }
+
     }
 }

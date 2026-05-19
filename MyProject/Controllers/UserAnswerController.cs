@@ -57,6 +57,10 @@ namespace MyProject.Controllers
             {
                 return NotFound(ex.Message);
             }
+            catch(NotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception)
             {
                 return StatusCode(500, "An error occurred while processing your request.");

@@ -17,6 +17,9 @@ namespace Repository.Repositories
             services.AddScoped<IRepository<Session>, SessionRepository>();
             services.AddScoped<IRepository<Question>, QestionRepository>();
             services.AddScoped<IRepository<QuestionOption>, QuestionOptionRepository>();
+            services.AddScoped<IEssentials<Session>, SessionRepository>();
+            services.AddScoped<IEssentials<UserAnswer>, UserAnswerRepository>();
+
             return services;
         }
     }

@@ -57,7 +57,7 @@ namespace Services.Services
         .ToListAsync();
 
             if (answers == null || answers.Count == 0)
-                throw new NotFoundException("No answers found for the specified user");
+                return null;
             return answers.Select(a => new UserAnswerDto
             {
                 AnswerId = a.AnswerId,

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public class SessionRepository : IRepository<Session>
+    public class SessionRepository : IRepository<Session>,IEssentials<Session>
     {
         private readonly IContext ctx;
         public SessionRepository(IContext ctx)
@@ -33,6 +33,8 @@ namespace Repository.Repositories
                 await ctx.Save();
             }
         }
+
+      
 
         public async Task<List<Session>> GetAll()
         {
@@ -73,5 +75,17 @@ namespace Repository.Repositories
             return s;
         }
 
+        public async Task UpdateRange(IEnumerable<Session> items)
+        {
+            if (items == null || !items.Any()) return;
+            ctx.Sessions.UpdateRange(items);
+            await ctx.Save();
+        }
+        public async Task DeleteRange(IEnumerable<int> ids)
+        {
+            await ctx.Sessions
+        .Where(item => ids.Contains(item.SessionId))
+        .ExecuteDeleteAsync();
+        }
     }
 }
