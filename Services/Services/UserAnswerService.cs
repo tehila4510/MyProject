@@ -255,18 +255,20 @@ namespace Services.Services
             return NormalizeText(dto.UserAnswerText) == NormalizeText(correctOption.OptionText);
         }
 
+
+
         private string NormalizeText(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return string.Empty;
 
             return text
-                .Trim()                    // רווחים מיותרים בהתחלה/סוף
-                .ToLower()                 // אותיות גדולות/קטנות
-                .Replace("  ", " ")       // רווחים כפולים באמצע
-                .Replace("'", "'")        // גרשיים שונים (don't / don't)
-                .Replace("'", "'");
+                .Trim()
+                .ToLower()
+                .Replace("  ", " ")
+                .Replace("’", "'") 
+                .TrimEnd('.', '?', '!', ',');
         }
 
-       
+
     }
 }

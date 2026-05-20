@@ -72,7 +72,6 @@ namespace Services.Services
 
 
             CreateMap<QuestionDto, Question>()
-                .ForMember(dest => dest.QuestionTypeMask, opt => opt.Ignore())
                 .ForMember(dest => dest.AudioType, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.ImageURL, opt => opt.Ignore())

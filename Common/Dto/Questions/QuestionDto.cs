@@ -26,7 +26,8 @@ namespace Common.Dto.Question
             [StringLength(200, MinimumLength = 5, ErrorMessage = "Length must be between 5 and 200 characters")]
         public string Title { get; set; }
 
-           
+        public int QuestionTypeMask { get; set; }
+
         public string? AudioSource { get; set; }
         public byte[]? ImageUrl { get; set; }
         public IFormFile? file { get; set; }
