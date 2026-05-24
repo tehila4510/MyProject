@@ -18,21 +18,18 @@ namespace Services.Services
             imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "ProfileImages");
             questionImagePath = Path.Combine(Directory.GetCurrentDirectory(), "QuestionImages");
 
-            //User
-            CreateMap<User, UserDto>();
-
-            // מיפוי ליצירה ועדכון
             CreateMap<UserUpdateDto, User>()
-                .ForMember(d => d.PasswordHash, o => o.Condition(s => !string.IsNullOrEmpty(s.Password)))
-                .ForMember(d => d.PasswordHash, o => o.MapFrom(s => s.Password))
-                .ForMember(d => d.UserId, o => o.Ignore())
-                .ForMember(d => d.Xp, o => o.Ignore())
-                .ForMember(d => d.Streak, o => o.Ignore())
-                .ForMember(d => d.Hearts, o => o.Ignore())
-                .ForMember(d => d.CreatedAt, o => o.Ignore())
-                .ForMember(d => d.Role, o => o.Ignore())
-                .ForMember(d => d.AvatarUrl, o => o.Ignore());
-
+     .ForMember(d => d.Name, o => o.Condition(s => !string.IsNullOrEmpty(s.Name)))
+     .ForMember(d => d.Email, o => o.Condition(s => !string.IsNullOrEmpty(s.Email)))
+     .ForMember(d => d.PasswordHash, o => o.Condition(s => !string.IsNullOrEmpty(s.Password)))
+     .ForMember(d => d.PasswordHash, o => o.MapFrom(s => s.Password))
+     .ForMember(d => d.UserId, o => o.Ignore())
+     .ForMember(d => d.Xp, o => o.Ignore())
+     .ForMember(d => d.Streak, o => o.Ignore())
+     .ForMember(d => d.Hearts, o => o.Ignore())
+     .ForMember(d => d.CreatedAt, o => o.Ignore())
+     .ForMember(d => d.Role, o => o.Ignore())
+     .ForMember(d => d.AvatarUrl, o => o.Ignore());
 
             //UserAnswer
             CreateMap<UserAnswer, UserAnswerDto>();
