@@ -100,7 +100,8 @@ namespace Services.Services
             if (user == null) throw new KeyNotFoundException("User not found");
             int userLevel = user.CurrentLevel;
 
-            skillId = skillId ??= Random.Shared.Next(1, 9);
+            int resolvedSkillId = (int)skillId;
+            //?? Random.Shared.Next(1, 9);
 
             var sessionAnsweredIds = await answerRepository
                 .GetByCondition(a => a.SessionId == sessionId)
@@ -109,7 +110,7 @@ namespace Services.Services
 
             var availableQuestions = await repository
                 .GetByCondition(q =>
-                    q.SkillId == skillId &&
+                    q.SkillId == resolvedSkillId &&
                     !sessionAnsweredIds.Contains(q.QuestionId))
                 .Include(q => q.Options)
                 .ToListAsync();
@@ -120,7 +121,6 @@ namespace Services.Services
             var sessionAnswers = userAnswers.Where(a => a.SessionId == sessionId).ToList();
             int correctStreak = GetCurrentCorrectStreak(sessionAnswers);
             int targetLevel = CalculateTargetLevel(userLevel, correctStreak);
-
             var selectedQuestion = SelectBestQuestion(availableQuestions, userAnswers, targetLevel);
 
             var answerRecord = new UserAnswer
@@ -154,26 +154,8 @@ namespace Services.Services
 
         private int CalculateTargetLevel(int userLevel, int correctStreak)
         {
-            int levelBoost = correctStreak / 5;
-            int targetLevel = userLevel + levelBoost;
-
-            return Math.Min(targetLevel, 5);
-        }
-
-        private double GetQuestionWeight(Question question, List<UserAnswer> answers)
-        {
-            var pastAnswer = answers.FirstOrDefault(a => a.QuestionId == question.QuestionId);
-            double weight = 1.0;
-
-            if (pastAnswer == null)
-                weight = 1.0;
-            else if (!pastAnswer.IsCorrect)
-                weight = 1.2;
-            else
-                weight = 0.5;
-
-            weight *= question.LevelId;
-            return weight;
+            int streakBoost = correctStreak / 5;
+            return Math.Min(userLevel + streakBoost, 6);
         }
 
         private Question SelectBestQuestion(
@@ -197,7 +179,8 @@ namespace Services.Services
         private double CalculateQuestionWeight(
             Question question,
             List<UserAnswer> history,
-            int targetLevel)
+            int targetLevel
+            )
         {
             double weight = 1.0;
 
@@ -209,6 +192,7 @@ namespace Services.Services
                 2 => 0.5,  
                 _ => 0.0   
             };
+          
 
             var pastAnswer = history
                 .Where(a => a.QuestionId == question.QuestionId)

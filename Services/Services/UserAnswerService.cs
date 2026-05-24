@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Common;
 using Common.Dto.Questions;
-using Common.Dto.Sessions;
 using Common.Dto.UserProgress;
 using Common.Enums;
 using Common.StaticData;
@@ -50,7 +49,7 @@ namespace Services.Services
             return mapper.Map<List<UserAnswerDto>>(ua);
         }
         public async Task<List<UserAnswerDto>> GetByUser(int userId)
-        { 
+        {
             var answers = await repository.GetByCondition(s => s.UserId == userId)
                  .Include(a => a.Question)
             .ThenInclude(q => q.Options)
@@ -110,10 +109,10 @@ namespace Services.Services
             answer.UserId = userId;
             answer.QuestionId = dto.QuestionId;
             answer.SessionId = dto.SessionId;
-            answer.UserAnswerText = (dto.SelectedOptionId.HasValue || dto.SelectedOptionId==0)
-                ? question.Options.First(o => o.OptionId == dto.SelectedOptionId).OptionText
-                : dto.UserAnswerText;
 
+            answer.UserAnswerText = (dto.SelectedOptionId > 0)
+    ? question.Options.FirstOrDefault(o => o.OptionId == dto.SelectedOptionId)?.OptionText ?? dto.UserAnswerText
+    : dto.UserAnswerText;
             answer.IsCorrect = CheckAnswer(question, dto);
             await repository.UpdateItem(answer.AnswerId, answer);
 
@@ -131,7 +130,7 @@ namespace Services.Services
                 : $"The correct answer is: {correctOption?.OptionText}";
 
             return new QuestionReviewDto
-            {  
+            {
                 IsCorrect = answer.IsCorrect,
                 FeedbackMessage = feedback,
                 CorrectAnswerText = (bool)answer.IsCorrect ? null : BuildCorrectAnswerText(question)
@@ -265,7 +264,7 @@ namespace Services.Services
                 .Trim()
                 .ToLower()
                 .Replace("  ", " ")
-                .Replace("’", "'") 
+                .Replace("’", "'")
                 .TrimEnd('.', '?', '!', ',');
         }
 

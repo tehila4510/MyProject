@@ -20,14 +20,18 @@ namespace Services.Services
         private readonly IProgressRepository repository;
         private readonly IRepository<Question> questionRepository;
         private readonly IRepository<User> userRepository;
+        private readonly IRepository<Session> sessionRepository;
+        private readonly IRepository<UserAnswer> answerRepository;
 
         private readonly IMapper mapper;
-        public UserSkillProgressService(IProgressRepository repository, IMapper mapper, IRepository<Question> questionRepository, IRepository<User> userRepository)
+        public UserSkillProgressService(IProgressRepository repository, IMapper mapper, IRepository<Question> questionRepository, IRepository<User> userRepository, IRepository<Session> sessionRepository, IRepository<UserAnswer> answerRepository)
         {
             this.repository = repository;
             this.mapper = mapper;
             this.questionRepository = questionRepository;
             this.userRepository = userRepository;
+            this.sessionRepository = sessionRepository;
+            this.answerRepository = answerRepository;   
         }
         public async Task<UserSkillProgressDto> Add(UserSkillProgressDto item)
         {
@@ -57,17 +61,36 @@ namespace Services.Services
                 .GetByCondition(s => s.UserId == userId)
                 .ToListAsync();
             if (progress == null || progress.Count == 0)
-                throw new NotFoundException("No progress found for the specified user");
-          //  return mapper.Map<List<UserSkillProgressViewDto>>(progress);
+                return new List<UserSkillProgressViewDto>();
 
-            return progress.Select(entity => new UserSkillProgressViewDto
+            var sessions = await sessionRepository
+                .GetByCondition(s => s.UserId == userId)
+                .ToListAsync();
+
+            var answers = await answerRepository
+                .GetByCondition(a => a.UserId == userId)
+                .Include(a => a.Question)
+                .ToListAsync();
+
+            return progress.Select(entity =>
             {
-                SkillId = entity.SkillId,
-                SkillName = GetSkillName(entity.SkillId),
-                ProgressPercent = CalculateProgress(entity.Mastery),
-                Accuracy = 2,
-                WeeklyXp = new List<int> { 500, 40, 30, 200 },
-                LastPracticed = entity.LastPracticed
+                var skillAnswers = answers
+                    .Where(a => a.Question?.SkillId == entity.SkillId && !string.IsNullOrEmpty(a.UserAnswerText))
+                    .ToList();
+
+                int total = skillAnswers.Count;
+                int correct = skillAnswers.Count(a => a.IsCorrect);
+                int accuracy = total == 0 ? 0 : (int)Math.Round((double)correct / total * 100);
+
+                return new UserSkillProgressViewDto
+                {
+                    SkillId = entity.SkillId,
+                    SkillName = GetSkillName(entity.SkillId),
+                    ProgressPercent = CalculateProgress(entity.Mastery),
+                    Accuracy = accuracy,
+                    WeeklyXp = GetWeeklyXp(sessions),
+                    LastPracticed = entity.LastPracticed
+                };
             }).ToList();
         }
 

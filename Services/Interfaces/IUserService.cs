@@ -1,4 +1,5 @@
 ﻿using Common.Dto.User;
+using Repository.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Services.Interfaces
         Task<UserDto> Update(int id, UserUpdateDto updateDto);
         Task Delete(int id);
         Task<bool> UserExists(string email);
-        Task<bool> LoseHeart(int userId);
+        Task<User> LoseHeart(int userId);
         Task ResetHearts(int userId);
     }
 }

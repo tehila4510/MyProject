@@ -44,7 +44,7 @@ namespace Services.Services
 
             var sessions = await repository.GetAll();
             if (sessions == null || sessions.Count == 0)
-                throw new NotFoundException("No sessions found");
+                return new List<SessionDto>();
             return mapper.Map<List<SessionDto>>(sessions);
         }
         public async Task<List<SessionDto>> GetByUser(int userId)

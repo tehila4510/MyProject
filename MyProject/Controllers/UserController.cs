@@ -127,8 +127,13 @@ namespace MyProject.Controllers
             try
             {
                 var userId = GetUserId();
-                var hasHearts = await service.LoseHeart(userId);
-                return Ok(new { hasHearts });
+                var user = await service.LoseHeart(userId);
+
+                return Ok(new
+                {
+                    hasHearts = user.Hearts > 0,
+                    currentHearts = user.Hearts
+                });
             }
             catch (KeyNotFoundException ex)
             {
@@ -139,6 +144,7 @@ namespace MyProject.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         private int GetUserId()
         {
             return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
