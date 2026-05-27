@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Crypto.Generators;
 using Repository.Entities;
 using Repository.Interfaces;
+using Repository.Repositories;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -102,6 +103,14 @@ namespace Services.Services
                 var fileName = await fileService.SaveFileAsync(updateDto.file);
                 user.AvatarUrl = fileName;
             }
+            if (!string.IsNullOrEmpty(updateDto.Email) && updateDto.Email != user.Email)
+            {
+                var emailExists = await repository.GetByCondition(u => u.Email == updateDto.Email && u.UserId != id).AnyAsync();
+                if (emailExists)
+                {
+                    throw new InvalidOperationException("Email is already taken by another user.");
+                }
+            }
             mapper.Map(updateDto, user);
             await repository.UpdateItem(id, user);
             return mapper.Map<UserDto>(user);
@@ -128,9 +137,12 @@ namespace Services.Services
 
             return user;
         }
-        public Task ResetHearts(int userId)
+        public async Task ResetAllHeartsAsync()
         {
-            throw new NotImplementedException();
+            if (repository is UserRepository userRepo)
+            {
+                await userRepo.ResetHeartsForAll();
+            }
         }
     }
 }

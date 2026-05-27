@@ -16,6 +16,6 @@ namespace Services.Interfaces
         Task Delete(int id);
         Task<bool> UserExists(string email);
         Task<User> LoseHeart(int userId);
-        Task ResetHearts(int userId);
+        Task ResetAllHeartsAsync();
     }
 }

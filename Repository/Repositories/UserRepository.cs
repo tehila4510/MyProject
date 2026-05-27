@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace Repository.Repositories
 {
-    public class UserRepository : IRepository<User>
+    public class UserRepository : IRepository<User>, IUserRepository
     {
         private readonly IContext ctx;
         public UserRepository(IContext context)
@@ -45,6 +45,11 @@ namespace Repository.Repositories
         public async Task<User> GetById(int id)
         {
             return await ctx.Users.FirstOrDefaultAsync(x => x.UserId == id);
+        }
+
+        public async Task ResetHeartsForAll()
+        {
+            await ctx.Users.ExecuteUpdateAsync(s => s.SetProperty(u => u.Hearts, 5));
         }
 
         public async Task<User> UpdateItem(int id, User item)

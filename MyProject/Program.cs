@@ -54,6 +54,7 @@ namespace MyProject
             builder.Services.AddScoped<IContext>(provider => new GlottieContext(connection));
             builder.Services.AddSingleton<IChatService, ChatService>();
             builder.Services.AddAutoMapper(typeof(MapperProfile));
+            builder.Services.AddHostedService<HeartResetWorker>();
 
             //var provider = builder.Services.BuildServiceProvider();
             //var mapper = provider.GetRequiredService<IMapper>();

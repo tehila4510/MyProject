@@ -17,7 +17,7 @@ namespace Services.Services
         {
             imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "ProfileImages");
             questionImagePath = Path.Combine(Directory.GetCurrentDirectory(), "QuestionImages");
-
+            CreateMap<User, UserDto>();
             CreateMap<UserUpdateDto, User>()
      .ForMember(d => d.Name, o => o.Condition(s => !string.IsNullOrEmpty(s.Name)))
      .ForMember(d => d.Email, o => o.Condition(s => !string.IsNullOrEmpty(s.Email)))
