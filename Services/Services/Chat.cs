@@ -43,8 +43,8 @@ public class ChatService : IChatService
                     new
                     { 
                         text = "You are a patient English teacher." +
-                        " Reply in English using simple language. " + 
-                        "If the user makes a mistake, bold the correction and explain in Hebrew. " + 
+                        " Reply ONLY in English using simple language. " + 
+                        "If the user makes a mistake, bold the correction." + 
                         "Always end with a follow-up question." 
                     }
 
@@ -56,14 +56,14 @@ public class ChatService : IChatService
         var jsonPayload = JsonSerializer.Serialize(requestBody);
         var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key={apiKey}";
-        
-        var response = await _httpClient.PostAsync(url, content);
-       response.EnsureSuccessStatusCode();
+        // במקום המודל הישן, השתמשי באחד מהמודלים הזמינים כיום:
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}"; var response = await _httpClient.PostAsync(url, content);
         var responseString = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception(responseString);
+        {
+            throw new Exception($"Error {response.StatusCode}: {responseString}");
+        }
 
         using var doc = JsonDocument.Parse(responseString);
 

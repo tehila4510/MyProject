@@ -1,9 +1,12 @@
 ﻿using Common.Dto.Chat;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Services.Interfaces;
 
 [ApiController]
+[Authorize]
+
 [Route("api/[controller]")]
 public class ChatController : ControllerBase
 {
@@ -28,7 +31,7 @@ public class ChatController : ControllerBase
         }
         catch (Exception e)
         {
-            return BadRequest();
+            return BadRequest(e.Message);
         }
     }
 }
