@@ -25,6 +25,8 @@ namespace Services.Services
             this.repository = repository;
             this.mapper = mapper;
         }
+        #region CRUD Methods
+
         public async Task<SessionDto> Add(SessionDto item)
         {
             var session = mapper.Map<Session>(item);
@@ -71,5 +73,6 @@ namespace Services.Services
             var session =await repository.UpdateItem(id, mapper.Map<Session>(item));
             return mapper.Map<SessionDto>(session);
         }
+        #endregion
     }
 }

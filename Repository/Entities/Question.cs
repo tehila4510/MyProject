@@ -14,7 +14,6 @@ namespace Repository.Entities
         public string QuestionText { get; set; }
         public string Title { get; set; }
 
-        // Bitmask במקום מערך ENUM
         public int QuestionTypeMask { get; set; }
 
         public AudioTypeEnum? AudioType { get; set; }

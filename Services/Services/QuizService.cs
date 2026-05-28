@@ -87,8 +87,8 @@ namespace Services.Services
         {
             var s = await sessionRepository.GetById(sessionId);
             if (s == null)
-             
                 throw new KeyNotFoundException($"Session with id {sessionId} not found");
+
             if (s.EndedAt.HasValue)
                 return MapToSessionDto(s);
 
@@ -98,7 +98,9 @@ namespace Services.Services
            .ToList();
 
             var (score, totalQuestions, correctCount) = CalculateSessionScore(completedAnswers);
-            int xp = CalculateXpGained(completedAnswers, score);
+            bool isFailed = totalQuestions < 10;
+
+            int xp = isFailed ? 0 : CalculateXpGained(completedAnswers, score);
 
             s.Score = (int)Math.Round(score);
             s.TotalQuestions = totalQuestions;
@@ -109,7 +111,6 @@ namespace Services.Services
             await CleanupSessionAnswers(s);
 
 
-            //עדכון היוזר
             var user = await userRepository.GetById(s.UserId);
             user.Xp += xp;
             user.CurrentLevel = CalculateLevel(user.Xp);
@@ -134,7 +135,6 @@ namespace Services.Services
 
 
         //--------------פעולות עזר----------------
-
 
         private async Task CleanupSessionAnswers(Session session)
         {
@@ -207,8 +207,8 @@ namespace Services.Services
                 totalWeighted += levelMultiplier * timeWeight * attemptWeight;
             }
 
-            double score = maxPossible == 0 ? 0 : (totalWeighted / maxPossible) * 100;
-            return (score, totalQuestions, correctCount);
+            double score = (totalWeighted / 10.0) * 100;
+            return (Math.Min(score, 100), totalQuestions, correctCount);
         }
         public int CalculateXpGained(List<UserAnswer> answers, double score)
         {
@@ -227,13 +227,13 @@ namespace Services.Services
                 .Where(g =>
                 {
                     var ordered = g.OrderBy(a => a.AnsweredAt).ToList();
-                    return ordered.Last().IsCorrect              // נכון בסוף
-                        && ordered.Count == 1                    // בניסיון ראשון
+                    return ordered.Last().IsCorrect              
+                        && ordered.Count == 1                    
                         && (ordered.Last().Question?.LevelId ?? 0) >= 4;
                 })
                 .Count() * 5; 
 
-            int streakBonus = 0; // ניתן להוסיף לוגיקה כאן
+            int streakBonus = 0;
 
             return baseXp + scoreBonus + hardQuestionBonus;
         }

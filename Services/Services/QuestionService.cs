@@ -28,6 +28,7 @@ namespace Services.Services
             this.userRepository = userRepository;
             this._cache = cache;
         }
+        #region CRUD Methods
         public async Task<QuestionDto> Add(QuestionDto dto)
         {
             var question = mapper.Map<Question>(dto);
@@ -77,31 +78,20 @@ namespace Services.Services
             var question =await repository.UpdateItem(id, mapper.Map<Question>(item));
             return mapper.Map<QuestionDto>(question);
         }
+        #endregion
 
-        //------------אלגוריתם-------------
+        //------------Algorithm-------------
 
-        private async Task<List<UserAnswer>> GetUserAnswersFromCache(int userId)
-        {
-           // _cache.Remove($"UserAnswers_{userId}");
-            string cacheKey = $"UserAnswers_{userId}";
-            if (!_cache.TryGetValue(cacheKey, out List<UserAnswer> userAnswers))
-            {
-                userAnswers = await answerRepository
-                    .GetByCondition(a => a.UserId == userId)
-                    .ToListAsync();
-
-                _cache.Set(cacheKey, userAnswers, TimeSpan.FromMinutes(30));
-            }
-            return userAnswers;
-        }
+       
         public async Task<QuestionDto> GetNextQuestion(int userId, int sessionId, int? skillId)
         {
             var user = await userRepository.GetById(userId);
             if (user == null) throw new KeyNotFoundException("User not found");
+
             int userLevel = user.CurrentLevel;
 
-            int resolvedSkillId = (int)skillId;
-            //?? Random.Shared.Next(1, 9);
+            int resolvedSkillId = skillId
+            ?? Random.Shared.Next(1, 9);
 
             var sessionAnsweredIds = await answerRepository
                 .GetByCondition(a => a.SessionId == sessionId)
@@ -114,13 +104,13 @@ namespace Services.Services
                     !sessionAnsweredIds.Contains(q.QuestionId))
                 .Include(q => q.Options)
                 .ToListAsync();
-
+            
             if (!availableQuestions.Any()) return null;
 
             var userAnswers = await GetUserAnswersFromCache(userId);
             var sessionAnswers = userAnswers.Where(a => a.SessionId == sessionId).ToList();
-            int correctStreak = GetCurrentCorrectStreak(sessionAnswers);
-            int targetLevel = CalculateTargetLevel(userLevel, correctStreak);
+            int cntCorrectAns = GetCurrentCorrectAns(sessionAnswers);
+            int targetLevel = CalculateTargetLevel(userLevel, cntCorrectAns);
             var selectedQuestion = SelectBestQuestion(availableQuestions, userAnswers, targetLevel);
 
             var answerRecord = new UserAnswer
@@ -138,8 +128,58 @@ namespace Services.Services
             dto.AnswerRecordId = answerRecord.AnswerId;
             return dto;
         }
+        private Question SelectBestQuestion(List<Question> available, List<UserAnswer> userHistory, int targetLevel)
+        {
+            var historyDict = userHistory
+         .GroupBy(h => h.QuestionId)
+         .ToDictionary(g => g.Key, g => g.OrderByDescending(a => a.AnsweredAt).First());
 
-        private int GetCurrentCorrectStreak(List<UserAnswer> sessionAnswers)
+            var allWeighted = available.Select(q => new
+            {
+                Question = q,
+                Weight = CalculateQuestionWeightOptimized(q, historyDict, targetLevel)
+            })
+            .OrderByDescending(x => x.Weight)
+            .ToList();
+
+            var topCandidates = allWeighted.Take(20).ToList();
+
+            double totalWeight = topCandidates.Sum(x => x.Weight);
+            double randomPoint = Random.Shared.NextDouble() * totalWeight;
+            double currentSum = 0;
+
+            foreach (var candidate in topCandidates)
+            {
+                currentSum += candidate.Weight;
+                if (currentSum >= randomPoint)
+                    return candidate.Question;
+            }
+
+            return topCandidates.First().Question;
+        }
+        private double CalculateQuestionWeightOptimized(Question question, Dictionary<int, UserAnswer> historyDict, int targetLevel)
+        {
+            double weight = 1.0;
+
+            int levelDiff = Math.Abs(question.LevelId - targetLevel);
+            weight += levelDiff switch { 0 => 3.0, 1 => 1.5, 2 => 0.5, _ => 0.0 };
+
+            if (!historyDict.TryGetValue(question.QuestionId, out var lastAnswer))
+            {
+                weight += 1.5;
+            }
+            else
+            {
+                if (!lastAnswer.IsCorrect)
+                    weight += 2.0;
+                else
+                    weight -= 0.7;
+            }
+
+            return weight;
+        }
+        #region Helper Methods
+        private int GetCurrentCorrectAns(List<UserAnswer> sessionAnswers)
         {
             int streak = 0;
             foreach (var answer in sessionAnswers.OrderByDescending(a => a.AnsweredAt))
@@ -158,56 +198,20 @@ namespace Services.Services
             return Math.Min(userLevel + streakBoost, 6);
         }
 
-        private Question SelectBestQuestion(
-            List<Question> available,
-            List<UserAnswer> userHistory,
-            int targetLevel)
+        private async Task<List<UserAnswer>> GetUserAnswersFromCache(int userId)
         {
-            var weighted = available
-                .Select(q => new
-                {
-                    Question = q,
-                    Weight = CalculateQuestionWeight(q, userHistory, targetLevel)
-                })
-                .OrderByDescending(x => x.Weight)
-                .ToList();
-
-            var topCandidates = weighted.Take(3).ToList();
-            var randomIndex = Random.Shared.Next(topCandidates.Count);
-            return topCandidates[randomIndex].Question;
-        }
-        private double CalculateQuestionWeight(
-            Question question,
-            List<UserAnswer> history,
-            int targetLevel
-            )
-        {
-            double weight = 1.0;
-
-            int levelDiff = Math.Abs(question.LevelId - targetLevel);
-            weight += levelDiff switch
+            // _cache.Remove($"UserAnswers_{userId}");
+            string cacheKey = $"UserAnswers_{userId}";
+            if (!_cache.TryGetValue(cacheKey, out List<UserAnswer> userAnswers))
             {
-                0 => 3.0,  
-                1 => 1.5,  
-                2 => 0.5,  
-                _ => 0.0   
-            };
-          
+                userAnswers = await answerRepository
+                    .GetByCondition(a => a.UserId == userId)
+                    .ToListAsync();
 
-            var pastAnswer = history
-                .Where(a => a.QuestionId == question.QuestionId)
-                .OrderByDescending(a => a.AnsweredAt)
-                .FirstOrDefault();
-
-            if (pastAnswer == null)
-                weight += 1.0; 
-            else if (!pastAnswer.IsCorrect)
-                weight += 2.0; 
-            else
-                weight -= 0.5; 
-            return weight;
+                _cache.Set(cacheKey, userAnswers, TimeSpan.FromMinutes(30));
+            }
+            return userAnswers;
         }
-
-        
+        #endregion
     }
 }

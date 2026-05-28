@@ -25,6 +25,7 @@ namespace Services.Services
             this._cache = cache;
             this.mapper = mapper;
         }
+        #region CRUD Methods
         public async Task<UserAnswerDto> Add(UserAnswerDto item)
         {
             var ua = await repository.AddItem(mapper.Map<UserAnswer>(item));
@@ -87,16 +88,17 @@ namespace Services.Services
             var ua = await repository.UpdateItem(id, mapper.Map<UserAnswer>(item));
             return mapper.Map<UserAnswerDto>(ua);
         }
+        #endregion
 
 
-        //--------------אלגוריתם-------------
+        //--------------ALGORITHM-------------
 
         public async Task<QuestionReviewDto> SubmitAnswer(int userId, UserAnswerDto dto)
         {
             if (dto.UserId != userId)
                 throw new UnauthorizedAccessException();
 
-            var answer = await repository.GetById((int)dto.AnswerRecordId);
+            var answer = await repository.GetById(dto.AnswerRecordId ?? 0);
             if (answer == null)
                 throw new KeyNotFoundException("Answer record not found");
 
@@ -105,7 +107,7 @@ namespace Services.Services
                 throw new KeyNotFoundException("Question not found");
 
             var answeredAt = DateTime.UtcNow;
-            answer.TimeToAnswerMs = answeredAt - answer.AnsweredAt!.Value;
+            answer.TimeToAnswerMs = answeredAt - answer.AnsweredAt.Value;
             answer.UserId = userId;
             answer.QuestionId = dto.QuestionId;
             answer.SessionId = dto.SessionId;
@@ -138,7 +140,7 @@ namespace Services.Services
         }
 
 
-        //-------------פעולות עזר------------
+        #region Helper Methods
         private string GetEncouragementMessage()
         {
             var messages = new[]
@@ -157,18 +159,15 @@ namespace Services.Services
             var correctOption = question.Options.FirstOrDefault(o => o.IsCorrect);
             if (correctOption == null) return string.Empty;
 
-            // מילוי בתוך משפט - מחזיר את המשפט המלא
             if (question.HasQuestionType(QuestionTypeEnum.FillInTheBlank) ||
                 question.HasQuestionType(QuestionTypeEnum.ClozeTest))
             {
-                // "I ___ (to be) happy" → "I was happy"
                 return question.QuestionText
                     .Replace("___", correctOption.OptionText)
                     .Replace($"({ExtractHint(question.QuestionText)})", "")
                     .Trim();
             }
 
-            // טקסט חופשי - מציג רק את התשובה הנכונה
             if (question.HasQuestionType(QuestionTypeEnum.ShortAnswer) ||
                 question.HasQuestionType(QuestionTypeEnum.Translate) ||
                 question.HasQuestionType(QuestionTypeEnum.Spelling) ||
@@ -178,7 +177,6 @@ namespace Services.Services
                 return correctOption.OptionText;
             }
 
-            // בחירה רגילה - מציג את הטקסט של האופציה הנכונה
             if (question.HasQuestionType(QuestionTypeEnum.MultipleChoice) ||
                 question.HasQuestionType(QuestionTypeEnum.TrueFalse) ||
                 question.HasQuestionType(QuestionTypeEnum.ConversationCompletion) ||
@@ -190,7 +188,6 @@ namespace Services.Services
                 return correctOption.OptionText;
             }
 
-            // מורכבים - מציג הסבר + תשובה
             if (question.HasQuestionType(QuestionTypeEnum.Ordering) ||
                 question.HasQuestionType(QuestionTypeEnum.DragAndDrop))
             {
@@ -213,7 +210,6 @@ namespace Services.Services
             return correctOption.OptionText;
         }
 
-        // מחלץ את הרמז מתוך הסוגריים - (to be) → to be
         private string ExtractHint(string questionText)
         {
             var match = System.Text.RegularExpressions.Regex.Match(questionText, @"\(([^)]+)\)");
@@ -268,6 +264,6 @@ namespace Services.Services
                 .TrimEnd('.', '?', '!', ',');
         }
 
-
+        #endregion
     }
 }

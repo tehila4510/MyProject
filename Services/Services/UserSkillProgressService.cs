@@ -60,6 +60,7 @@ namespace Services.Services
             var progress = await repository
                 .GetByCondition(s => s.UserId == userId)
                 .ToListAsync();
+
             if (progress == null || progress.Count == 0)
                 return new List<UserSkillProgressViewDto>();
 
@@ -99,28 +100,26 @@ namespace Services.Services
             var entity = await repository.GetById(userId, skillId);
             if (entity == null)
                 throw new KeyNotFoundException("UserSkillProgress not found");
+            var sessions = await sessionRepository
+              .GetByCondition(s => s.UserId == userId)
+              .ToListAsync();
 
+            var allAnswersForSkill = await answerRepository
+        .GetByCondition(a => a.UserId == userId && a.Question.SkillId == skillId)
+        .ToListAsync();
+
+            int total = allAnswersForSkill.Count;
+            int correct = allAnswersForSkill.Count(a => a.IsCorrect);
             return new UserSkillProgressViewDto
             {
                 SkillId = entity.SkillId,
                 SkillName = GetSkillName(entity.SkillId),
 
                 ProgressPercent = CalculateProgress(entity.Mastery),
-                //Accuracy = CalculateAccuracy(entity.CorrectAnswers, entity.TotalQuestions),
-
-                //WeeklyXp = GetWeeklyXp(userId, skillId),
-
-
-                Accuracy = 2,
-                WeeklyXp = [500, 40, 30, 200],
+                Accuracy = CalculateAccuracy(total, correct),
+                WeeklyXp = GetWeeklyXp(sessions),
                 LastPracticed = entity.LastPracticed
             };
-        }
-        private string GetSkillName(int skillId)
-        {
-            return Skill.AllSkills.TryGetValue(skillId, out var skill)
-                ? skill.Name
-                : "Unknown";
         }
         public async Task<UserSkillProgressDto> Update(int userId, int skillId, UserSkillProgressDto item)
         {
@@ -158,7 +157,6 @@ namespace Services.Services
 
             if (skillProgress == null)
             {
-                // יצירה ראשונית
                 skillProgress = new UserSkillProgress
                 {
                     UserId = userId,
@@ -170,8 +168,7 @@ namespace Services.Services
                 return;
             }
 
-            // עדכון Mastery - בין 0 ל-100
-            int delta = isCorrect == 1 ? 5 : -3; // נכון = +5, טעות = -3
+            int delta = isCorrect == 1 ? 5 : -3;
             skillProgress.Mastery = Math.Clamp(skillProgress.Mastery + delta, 0, 100);
             skillProgress.LastPracticed = DateTime.UtcNow;
 
@@ -185,21 +182,21 @@ namespace Services.Services
         {
             var result = new int[7];
 
-            var startOfWeek = DateTime.UtcNow.Date.AddDays(-6);
+            DateTime today = DateTime.UtcNow.Date;
+            int daysToSubtract = (int)today.DayOfWeek;
+            DateTime startOfThisWeek = today.AddDays(-daysToSubtract);
 
             foreach (var session in sessions)
             {
-                if (!session.StartedAt.HasValue)
-                    continue;
+                if (!session.StartedAt.HasValue) continue;
 
-                var date = session.StartedAt.Value.Date;
+                var sessionDate = session.StartedAt.Value.Date;
 
-                if (date < startOfWeek)
-                    continue;
-
-                int dayIndex = (date - startOfWeek).Days;
-
-                result[dayIndex] += session.Xp;
+                if (sessionDate >= startOfThisWeek && sessionDate <= today)
+                {
+                    int dayIndex = (int)sessionDate.DayOfWeek;
+                    result[dayIndex] += session.Xp;
+                }
             }
 
             return result.ToList();
@@ -211,7 +208,12 @@ namespace Services.Services
 
             return (int)Math.Round((double)correctAnswers / totalQuestions * 100);
         }
+        private string GetSkillName(int skillId)
+        {
+            return Skill.AllSkills.TryGetValue(skillId, out var skill)
+                ? skill.Name
+                : "Unknown";
+        }
 
-        
     }
 }

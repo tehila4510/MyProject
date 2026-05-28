@@ -20,6 +20,8 @@ namespace Services.Services
             this.repository = repository;
             this.mapper = mapper;
         }
+        #region CRUD Methods
+
         public async Task<QuestionOptionDto> Add(QuestionOptionDto item)
         {
             var qo=await repository.AddItem(mapper.Map<QuestionOption>(item));
@@ -62,5 +64,6 @@ namespace Services.Services
             var updated = await repository.UpdateItem(id, existingOption);
             return mapper.Map<QuestionOptionDto>(updated);
         }
+        #endregion
     }
 }
