@@ -2,11 +2,11 @@
 
 <img src="docs/assets/logo.png" alt="Glottie Logo" width="320" />
 
-# 🦉 Glottie — פלטפורמת לימוד אנגלית מבוססת AI
+# 🦉 Glottie — AI-Powered English Learning Platform
 
-### הדרך הכיפית, החכמה והאפקטיבית ללמוד אנגלית
+### The fun, smart, and effective way to learn English
 
-**פרויקט גמר Full-Stack · React + C# .NET + SQL Server**
+**Full-Stack Final Project · React + C# .NET + SQL Server**
 
 [![React](https://img.shields.io/badge/Frontend-React_18-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
 [![.NET](https://img.shields.io/badge/Backend-.NET_Web_API-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com)
@@ -17,52 +17,52 @@
 
 ---
 
-## 📌 על הפרויקט הזה (למורה)
+## 📌 About This Page
 
-> **זהו עמוד ההגשה המרכזי של פרויקט הגמר שלי.**
-> הפרויקט מורכב משני חלקים (Repositories) — צד לקוח (Frontend) וצד שרת (Backend) — והעמוד הזה מרכז את **שני הקישורים** יחד עם הסבר מלא ומסודר על כל מה שנבנה.
+> **This is the main submission page for my final project.**
+> The project is made up of two parts (repositories) — a Frontend (client side) and a Backend (server side) — and this page brings **both links** together with a full, organized explanation of everything that was built.
 
-**Glottie** היא אפליקציית **Full-Stack** ללימוד אנגלית בהשראת Duolingo: מערכת גיימיפיקציה (נקודות XP, לבבות, רצפים), מבחן רמה מתאים, שאלות מסוגים רבים, מעקב התקדמות אישי, ומורה AI חכם לשיחה חופשית.
+**Glottie** is a **Full-Stack** English learning app inspired by Duolingo: a gamification system (XP points, hearts, streaks), an adaptive placement test, many question types, personal progress tracking, and a smart AI teacher for free conversation.
 
-הפרויקט בנוי משלושה רכיבים עיקריים:
+The project is built from three main components:
 - 🎨 **Frontend** — React 18 + Vite + Redux Toolkit
-- ⚙️ **Backend** — C# .NET Web API בארכיטקטורה שכבתית (Clean Architecture)
-- 🗄️ **Database** — SQL Server עם Entity Framework Core (Code-First + Migrations)
+- ⚙️ **Backend** — C# .NET Web API with a layered (Clean) architecture
+- 🗄️ **Database** — SQL Server with Entity Framework Core (Code-First + Migrations)
 
 ---
 
-## 🔗 שני הקישורים של הפרויקט
+## 🔗 The Two Project Repositories
 
 <div align="center">
 
-| החלק | תיאור | קישור ל-Repository |
+| Part | Description | Repository Link |
 |:---:|:---|:---:|
-| ⚙️ **Backend (C# + SQL)** | שרת ה-API, לוגיקת השרת ובסיס הנתונים | **[github.com/tehila4510/MyProject](https://github.com/tehila4510/MyProject)** |
-| 🎨 **Frontend (React)** | ממשק המשתמש והאפליקציה | **[github.com/tehila4510/React-Project](https://github.com/tehila4510/React-Project)** |
+| ⚙️ **Backend (C# + SQL)** | The API server, server-side logic, and database | **[github.com/tehila4510/MyProject](https://github.com/tehila4510/MyProject)** |
+| 🎨 **Frontend (React)** | The user interface and application | **[github.com/tehila4510/React-Project](https://github.com/tehila4510/React-Project)** |
 
 </div>
 
-> 💡 שני הפרויקטים עובדים יחד: ה-Frontend (React) שולח בקשות ל-Backend (‎.NET‎), שמדבר עם בסיס הנתונים (SQL Server) ועם שירות ה-AI של Google Gemini.
+> 💡 Both projects work together: the React Frontend sends requests to the .NET Backend, which talks to the database (SQL Server) and to the Google Gemini AI service.
 
 ---
 
-## 📖 תוכן עניינים
+## 📖 Table of Contents
 
-- [ארכיטקטורה כללית](#-ארכיטקטורה-כללית)
-- [סטאק טכנולוגי](#-סטאק-טכנולוגי-tech-stack)
-- [יכולות ותכונות](#-יכולות-ותכונות-features)
-- [מבנה בסיס הנתונים](#-מבנה-בסיס-הנתונים-database)
-- [מבנה קוד השרת (Backend)](#-מבנה-קוד-השרת-backend)
-- [נקודות הקצה של ה-API](#-נקודות-הקצה-של-ה-api)
-- [מורה ה-AI](#-מורה-ה-ai-glottie-chat)
-- [הרצת הפרויקט](#-הרצת-הפרויקט-מהתחלה)
-- [גלריית מסכים ומיתוג](#-גלריית-מסכים-ומיתוג)
+- [Overall Architecture](#-overall-architecture)
+- [Tech Stack](#-tech-stack)
+- [Features](#-features)
+- [Database Design](#-database-design)
+- [Backend Code Structure](#-backend-code-structure)
+- [API Endpoints](#-api-endpoints)
+- [The AI Teacher](#-the-ai-teacher-glottie-chat)
+- [Getting Started](#-getting-started)
+- [Gallery & Branding](#-gallery--branding)
 
 ---
 
-## 🏗 ארכיטקטורה כללית
+## 🏗 Overall Architecture
 
-התרשים הבא מציג כיצד שלושת הרכיבים מתחברים יחד:
+The diagram below shows how the three components connect together:
 
 ```mermaid
 flowchart LR
@@ -73,8 +73,8 @@ flowchart LR
 
     subgraph Server["⚙️ Backend — C# .NET Web API"]
         API["Controllers / API"]
-        SVC["Services<br/>(לוגיקה עסקית)"]
-        REPO["Repository<br/>(גישה לנתונים)"]
+        SVC["Services<br/>(business logic)"]
+        REPO["Repository<br/>(data access)"]
     end
 
     subgraph Data["🗄️ Database"]
@@ -88,82 +88,82 @@ flowchart LR
     API --> SVC
     SVC --> REPO
     REPO --> DB
-    SVC -->|"מורה AI"| AI
+    SVC -->|"AI Teacher"| AI
 ```
 
-**זרימת עבודה טיפוסית:** המשתמש/ת מבצע/ת פעולה באפליקציית React → RTK Query שולח בקשת HTTP עם טוקן JWT ל-API של ‎.NET → ה-Controller מעביר ל-Service (לוגיקה עסקית) → ה-Repository ניגש לבסיס הנתונים דרך Entity Framework → התשובה חוזרת עד למשתמש/ת.
+**Typical flow:** the user performs an action in the React app → RTK Query sends an HTTP request with a JWT token to the .NET API → the Controller passes it to a Service (business logic) → the Repository accesses the database via Entity Framework → the response travels all the way back to the user.
 
 ---
 
-## 🛠 סטאק טכנולוגי (Tech Stack)
+## 🛠 Tech Stack
 
 ### 🎨 Frontend
-| טכנולוגיה | תפקיד |
+| Technology | Role |
 |---|---|
-| **React 18** | ספריית ה-UI |
-| **Vite** | כלי Build ושרת פיתוח מהיר |
-| **Redux Toolkit + RTK Query** | ניהול state וקריאות API עם Caching |
-| **React Router v6** | ניתוב בין מסכים |
-| **Material UI (MUI)** | רכיבי עיצוב |
-| **React Toastify** | הודעות למשתמש |
-| **Web Speech API** | הקראת שאלות בקול (Text-to-Speech) |
+| **React 18** | The UI library |
+| **Vite** | Fast build tool and dev server |
+| **Redux Toolkit + RTK Query** | State management and API calls with caching |
+| **React Router v6** | Routing between screens |
+| **Material UI (MUI)** | UI components |
+| **React Toastify** | User notifications |
+| **Web Speech API** | Reading questions aloud (Text-to-Speech) |
 
 ### ⚙️ Backend
-| טכנולוגיה | תפקיד |
+| Technology | Role |
 |---|---|
-| **C# / .NET Web API** | שרת ה-REST API |
-| **Entity Framework Core** | ORM לגישה לבסיס הנתונים (Code-First) |
-| **SQL Server** | בסיס הנתונים |
-| **JWT Bearer Authentication** | אימות והזדהות מאובטחת |
-| **AutoMapper** | המרה בין Entities ל-DTOs |
-| **Google Gemini API** | מנוע ה-AI של מורה השיחה |
-| **BackgroundService (Worker)** | איפוס אוטומטי של לבבות כל 24 שעות |
-| **Swagger / OpenAPI** | תיעוד ובדיקה של ה-API |
+| **C# / .NET Web API** | The REST API server |
+| **Entity Framework Core** | ORM for database access (Code-First) |
+| **SQL Server** | The database |
+| **JWT Bearer Authentication** | Secure authentication and authorization |
+| **AutoMapper** | Mapping between Entities and DTOs |
+| **Google Gemini API** | The AI engine behind the conversation teacher |
+| **BackgroundService (Worker)** | Automatic reset of hearts every 24 hours |
+| **Swagger / OpenAPI** | API documentation and testing |
 
 ---
 
-## ✨ יכולות ותכונות (Features)
+## ✨ Features
 
-### 🎓 חוויית הלמידה
-- **מבחן רמה (Placement Test)** — מבחן קצר שקובע את רמת הפתיחה של המשתמש/ת (A1–C2).
-- **בחירת רמה ידנית** — אפשרות לבחור רמה עם תיאור ויזואלי לכל רמה.
-- **9 תחומי מיומנות** — אוצר מילים, דקדוק, פעלים, האזנה, קריאה, כתיבה, הגייה, ביטויים, וצ'אט.
-- **מנוע שאלות מגוון** — עד 18 סוגי שאלות שונים (בחירה מרובה, השלמת מילים, גרירה, התאמה, סידור, האזנה, הגייה, תרגום ועוד) הממומשים באמצעות **Bitmask** חכם.
-- **משוב בזמן אמת** — תשובה נכונה/שגויה עם הסבר מיידי.
+### 🎓 Learning Experience
+- **Placement Test** — a short test that determines the user's starting level (A1–C2).
+- **Manual Level Selection** — the option to pick a level with a visual description for each one.
+- **9 Skill Areas** — Vocabulary, Grammar, Verbs, Listening, Reading, Writing, Pronunciation, Phrases, and Chat.
+- **Diverse Question Engine** — up to 18 different question types (multiple choice, fill in the blank, drag and drop, matching, ordering, listening, pronunciation, translation, and more) implemented using a smart **Bitmask**.
+- **Real-Time Feedback** — correct/incorrect answers with an instant explanation.
 
-### 🎮 גיימיפיקציה
-| | תכונה | תיאור |
+### 🎮 Gamification
+| | Feature | Description |
 |:---:|---|---|
-| <img src="docs/assets/star.png" width="26"/> | **נקודות XP** | צבירת נקודות על כל תרגול והתקדמות בין רמות |
-| ❤️ | **לבבות (Hearts)** | מספר טעויות מוגבל לכל סשן, מתאפס אוטומטית כל 24 שעות |
-| <img src="docs/assets/streak.png" width="26"/> | **רצף ימים (Streak)** | מעקב אחרי רצף ימי למידה |
-| 🎉 | **קונפטי וחגיגה** | אנימציית סיום מתגמלת בסוף כל תרגול |
+| <img src="docs/assets/star.png" width="26"/> | **XP Points** | Earn points for every practice session and progress between levels |
+| ❤️ | **Hearts** | A limited number of mistakes per session, reset automatically every 24 hours |
+| <img src="docs/assets/streak.png" width="26"/> | **Streaks** | Tracking your streak of learning days |
+| 🎉 | **Confetti & Celebration** | A rewarding completion animation at the end of every practice |
 
-### 📊 מעקב והתקדמות
-- **דשבורד התקדמות** — גרף XP שבועי, טבעות דיוק, ופירוט לפי מיומנות.
-- **"הטעויות שלי"** — עמוד שמרכז כל תשובה שגויה יחד עם התשובה הנכונה, ללמידה מהשגיאות.
-- **מפת חום (Heatmap)** — מעקב ויזואלי אחרי ימי התרגול.
+### 📊 Progress Tracking
+- **Progress Dashboard** — weekly XP chart, accuracy rings, and a per-skill breakdown.
+- **"My Mistakes"** — a page that collects every incorrect answer alongside the correct one, to learn from your mistakes.
+- **Heatmap** — a visual tracking of your practice days.
 
-### 👤 ניהול משתמש
-- הרשמה והתחברות מאובטחים עם **JWT**.
-- העלאת תמונת פרופיל (Avatar) עם תצוגה מקדימה.
-- עריכת שם, אימייל וסיסמה.
-- שמירת Session ב-`localStorage` (המשתמש נשאר מחובר גם אחרי רענון).
+### 👤 User Management
+- Secure registration and login with **JWT**.
+- Profile picture (avatar) upload with a live preview.
+- Editing name, email, and password.
+- Session persistence in `localStorage` (the user stays logged in even after refreshing).
 
 ---
 
-## 🗄 מבנה בסיס הנתונים (Database)
+## 🗄 Database Design
 
-בסיס הנתונים מנוהל ב-**SQL Server** באמצעות **Entity Framework Core** בגישת **Code-First** (הטבלאות נוצרות מהמחלקות ב-C# דרך Migrations).
+The database is managed in **SQL Server** using **Entity Framework Core** with a **Code-First** approach (the tables are created from the C# classes through Migrations).
 
 ```mermaid
 erDiagram
-    User ||--o{ Session : "מבצע"
-    User ||--o{ UserAnswer : "עונה"
-    User ||--o{ UserSkillProgress : "מתקדם"
-    Session ||--o{ UserAnswer : "מכיל"
-    Question ||--o{ QuestionOption : "כולל"
-    Question ||--o{ UserAnswer : "נענית ב"
+    User ||--o{ Session : "performs"
+    User ||--o{ UserAnswer : "answers"
+    User ||--o{ UserSkillProgress : "progresses"
+    Session ||--o{ UserAnswer : "contains"
+    Question ||--o{ QuestionOption : "includes"
+    Question ||--o{ UserAnswer : "answered in"
 
     User {
         int UserId PK
@@ -211,114 +211,114 @@ erDiagram
     }
 ```
 
-**הטבלאות המרכזיות:**
-- **User** — פרטי המשתמש, רמה, XP, לבבות ורצף.
-- **Session** — סשן תרגול בודד עם ניקוד ומספר תשובות נכונות.
-- **Question** + **QuestionOption** — מאגר השאלות והתשובות האפשריות.
-- **UserAnswer** — תיעוד כל תשובה שהמשתמש/ת נתן/ה (בשביל "הטעויות שלי").
-- **UserSkillProgress** — רמת השליטה (Mastery) של המשתמש/ת בכל מיומנות.
+**The main tables:**
+- **User** — user details, level, XP, hearts, and streak.
+- **Session** — a single practice session with a score and number of correct answers.
+- **Question** + **QuestionOption** — the pool of questions and their possible answers.
+- **UserAnswer** — a record of every answer the user gave (used for "My Mistakes").
+- **UserSkillProgress** — the user's mastery level in each skill.
 
-> **רמות ומיומנויות** מנוהלות כ-Static Data בקוד (6 רמות CEFR מ-A1 עד C2, ו-9 מיומנויות).
+> **Levels and skills** are managed as Static Data in the code (6 CEFR levels from A1 to C2, and 9 skills).
 
 ---
 
-## 📂 מבנה קוד השרת (Backend)
+## 📂 Backend Code Structure
 
-השרת בנוי ב**ארכיטקטורה שכבתית (Layered / Clean Architecture)** להפרדת אחריות ברורה:
+The server is built with a **layered (Clean) architecture** for a clear separation of concerns:
 
 ```
 MyProject/
-├── MyProject/        → שכבת ה-API (Controllers, Program.cs, הגדרות)
-├── Services/         → שכבת הלוגיקה העסקית (Services, AutoMapper, Workers)
-├── Repository/       → שכבת הגישה לנתונים (Entities, Repositories, Interfaces)
-├── DataContext/      → ה-DbContext של EF Core + כל ה-Migrations
-└── Common/           → קוד משותף (DTOs, Enums, Exceptions, Static Data)
+├── MyProject/        → The API layer (Controllers, Program.cs, configuration)
+├── Services/         → The business logic layer (Services, AutoMapper, Workers)
+├── Repository/       → The data access layer (Entities, Repositories, Interfaces)
+├── DataContext/      → The EF Core DbContext + all the Migrations
+└── Common/           → Shared code (DTOs, Enums, Exceptions, Static Data)
 ```
 
-**היתרון:** כל שכבה מכירה רק את השכבה שמתחתיה, מה שהופך את הקוד למסודר, ניתן לבדיקה וקל לתחזוקה.
+**The benefit:** each layer only knows about the layer below it, which makes the code organized, testable, and easy to maintain.
 
 ---
 
-## 🌐 נקודות הקצה של ה-API
+## 🌐 API Endpoints
 
-| Controller | דוגמאות ל-Endpoints | תפקיד |
+| Controller | Example Endpoints | Role |
 |---|---|---|
-| **User** | `POST /api/User/register`, `POST /api/User/login`, `POST /api/User/lose-heart` | הרשמה, התחברות, ניהול משתמש |
-| **Quiz** | `POST /api/Quiz/start-session`, `GET /api/Quiz/next-question/{id}`, `POST /api/Quiz/submit-answer` | ניהול מהלך התרגול |
-| **Question** / **QuestionOption** | `GET/POST/PUT/DELETE` | ניהול מאגר השאלות |
-| **Session** | `GET /api/Session/my-sessions` | היסטוריית סשנים |
-| **UserAnswer** | `GET /api/UserAnswer/my-answers` | התשובות של המשתמש/ת |
-| **UserSkillProgress** | `GET /api/UserSkillProgress/my-skill-progress` | התקדמות במיומנויות |
-| **Skill** | `GET /api/Skill` | רשימת המיומנויות |
-| **Chat** | `POST /api/Chat/ask` | שיחה עם מורה ה-AI |
+| **User** | `POST /api/User/register`, `POST /api/User/login`, `POST /api/User/lose-heart` | Registration, login, user management |
+| **Quiz** | `POST /api/Quiz/start-session`, `GET /api/Quiz/next-question/{id}`, `POST /api/Quiz/submit-answer` | Managing the practice flow |
+| **Question** / **QuestionOption** | `GET/POST/PUT/DELETE` | Managing the question pool |
+| **Session** | `GET /api/Session/my-sessions` | Session history |
+| **UserAnswer** | `GET /api/UserAnswer/my-answers` | The user's answers |
+| **UserSkillProgress** | `GET /api/UserSkillProgress/my-skill-progress` | Progress across skills |
+| **Skill** | `GET /api/Skill` | The list of skills |
+| **Chat** | `POST /api/Chat/ask` | Conversation with the AI teacher |
 
-> את כל ה-Endpoints אפשר לבדוק בצורה נוחה דרך **Swagger** בזמן הרצת השרת.
+> All the endpoints can be tested conveniently through **Swagger** while the server is running.
 
 ---
 
-## 🤖 מורה ה-AI (Glottie Chat)
+## 🤖 The AI Teacher (Glottie Chat)
 
 <div align="center">
 <img src="docs/assets/teacher-ai.png" alt="Glottie AI Teacher" width="200" />
 </div>
 
-אחת התכונות המתקדמות בפרויקט היא **מורה אנגלית וירטואלי** לשיחה חופשית, המבוסס על מודל **Google Gemini**.
+One of the more advanced features in the project is a **virtual English teacher** for free conversation, powered by the **Google Gemini** model.
 
-- השרת שומר את **היסטוריית השיחה** ושולח אותה יחד עם כל הודעה חדשה (context).
-- הוגדר **System Instruction** שמנחה את ה-AI לדבר באנגלית פשוטה, להדגיש תיקוני שגיאות, ותמיד לסיים בשאלת המשך שמעודדת המשך שיחה.
-- כך המשתמש/ת מתרגל/ת אנגלית בשיחה טבעית ומקבל/ת תיקונים בזמן אמת.
+- The server keeps the **conversation history** and sends it along with every new message (context).
+- A **System Instruction** was defined to guide the AI to speak in simple English, highlight corrections to mistakes, and always end with a follow-up question that encourages continuing the conversation.
+- This way the user practices English in a natural conversation and gets corrections in real time.
 
 ---
 
-## 🚀 הרצת הפרויקט מהתחלה
+## 🚀 Getting Started
 
-### דרישות מקדימות
-- **Node.js** בגרסה 18 ומעלה
+### Prerequisites
+- **Node.js** version 18 or higher
 - **.NET SDK**
-- **SQL Server** (או SQL Server Express / LocalDB)
+- **SQL Server** (or SQL Server Express / LocalDB)
 
-### 1️⃣ הרצת השרת (Backend)
+### 1️⃣ Run the Backend
 
 ```bash
-# שכפול ה-Repository של השרת
+# Clone the server repository
 git clone https://github.com/tehila4510/MyProject.git
 cd MyProject
 
-# הגדרת מחרוזת החיבור (Connection String) ומפתח ה-JWT ב-appsettings.json
-# יצירת בסיס הנתונים מה-Migrations:
+# Set the Connection String and JWT key in appsettings.json
+# Create the database from the Migrations:
 dotnet ef database update
 
-# הרצת השרת
+# Run the server
 dotnet run
-# ה-API יעלה בכתובת https://localhost:7185
+# The API will be available at https://localhost:7185
 ```
 
-> ⚠️ צריך להגדיר ב-`appsettings.json` את `ConnectionStrings:DefaultConnection` (חיבור ל-SQL Server), את `Jwt:Key`, ואת `GeminiSettings:ApiKey` (למורה ה-AI).
+> ⚠️ You need to set `ConnectionStrings:DefaultConnection` (the SQL Server connection), `Jwt:Key`, and `GeminiSettings:ApiKey` (for the AI teacher) in `appsettings.json`.
 
-### 2️⃣ הרצת האפליקציה (Frontend)
+### 2️⃣ Run the Frontend
 
 ```bash
-# שכפול ה-Repository של הריאקט
+# Clone the React repository
 git clone https://github.com/tehila4510/React-Project.git
 cd React-Project/my-react-app
 
-# התקנת החבילות
+# Install the packages
 npm install
 
-# הרצת האפליקציה
+# Run the app
 npm run dev
-# האפליקציה תיפתח בכתובת http://localhost:5173
+# The app will open at http://localhost:5173
 ```
 
-### 3️⃣ שימוש ראשון
-1. נכנסים לכתובת `http://localhost:5173`
-2. לוחצים **GET STARTED** ומבצעים הרשמה
-3. בוחרים רמה ידנית **או** עושים את מבחן הרמה
-4. מתחילים ללמוד! 🎉
+### 3️⃣ First Run
+1. Go to `http://localhost:5173`
+2. Click **GET STARTED** and register
+3. Choose a level manually **or** take the placement test
+4. Start learning! 🎉
 
 ---
 
-## 🖼 גלריית מסכים ומיתוג
+## 🖼 Gallery & Branding
 
 <div align="center">
 
@@ -326,7 +326,7 @@ npm run dev
 
 </div>
 
-### תחומי המיומנות באפליקציה
+### The Skill Areas in the App
 <div align="center">
 
 <img src="docs/assets/vocabulary.png" width="80" title="Vocabulary"/>
@@ -341,7 +341,7 @@ npm run dev
 
 </div>
 
-### מסכים ראשיים
+### Main Screens
 <div align="center">
 
 <img src="docs/assets/home.png" width="90" title="Home"/>
@@ -356,7 +356,7 @@ npm run dev
 
 <div align="center">
 
-### 🦉 נבנה באהבה בתור פרויקט גמר — Full-Stack
+### 🦉 Built with love as a Full-Stack final project
 
 **React · C# .NET · SQL Server · AI**
 
